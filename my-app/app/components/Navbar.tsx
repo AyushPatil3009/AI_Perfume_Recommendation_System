@@ -1,9 +1,33 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, Heart, Compass, ShieldCheck } from 'lucide-react';
+import { Sparkles, ShieldCheck, User as UserIcon, LogOut } from 'lucide-react';
 
 export function Navbar() {
+  const [user, setUser] = useState<{ name: string; email: string; credits: number } | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('aura_user');
+      if (stored) {
+        try {
+          setUser(JSON.parse(stored));
+        } catch (e) {
+          console.error('Failed to parse user session', e);
+        }
+      }
+    }
+  }, []);
+
+  function handleSignOut() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('aura_user');
+      setUser(null);
+      window.location.href = '/';
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-amber-500/10 bg-zinc-950/80 backdrop-blur-xl transition-all">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
@@ -25,28 +49,28 @@ export function Navbar() {
         {/* Navigation Links */}
         <nav className="hidden items-center gap-8 md:flex">
           <Link
-            href="#hero"
+            href="/#hero"
             className="text-sm font-medium text-zinc-300 transition-colors hover:text-amber-300"
           >
             Explore
           </Link>
 
           <Link
-            href="#how-it-works"
+            href="/#how-it-works"
             className="text-sm font-medium text-zinc-300 transition-colors hover:text-amber-300"
           >
             How It Works
           </Link>
 
           <Link
-            href="#families"
+            href="/#families"
             className="text-sm font-medium text-zinc-300 transition-colors hover:text-amber-300"
           >
             Fragrance Families
           </Link>
 
           <Link
-            href="#pricing"
+            href="/pricing"
             className="flex items-center gap-1.5 text-sm font-medium text-amber-400 transition-colors hover:text-amber-300"
           >
             <ShieldCheck className="h-4 w-4 text-amber-400" />
@@ -54,8 +78,35 @@ export function Navbar() {
           </Link>
         </nav>
 
-        {/* Call To Action Buttons */}
+        {/* Call To Action & Auth Status */}
         <div className="flex items-center gap-4">
+          {user ? (
+            <div className="flex items-center gap-3">
+              {/* User Badge */}
+              <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1.5 text-xs text-amber-300 font-mono">
+                <UserIcon className="h-3.5 w-3.5 text-amber-400" />
+                <span>{user.name || user.email.split('@')[0]}</span>
+                <span className="ml-1 rounded-full bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+                  {user.credits} Credits
+                </span>
+              </div>
+              <button
+                onClick={handleSignOut}
+                title="Sign Out"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-rose-500/40 hover:text-rose-400 transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="text-sm font-medium text-zinc-300 hover:text-amber-300 transition-colors"
+            >
+              Sign In
+            </Link>
+          )}
+
           <Link
             href="/recommend"
             className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 p-0.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-amber-500/20 transition-all hover:scale-105 hover:shadow-amber-500/30 active:scale-95"
