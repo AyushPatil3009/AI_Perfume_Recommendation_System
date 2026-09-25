@@ -1,0 +1,193 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// 1. USER & AUTHENTICATION
+// ==========================================
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  PREMIUM
+}
+
+model User {
+  id                    String                 @id @default(cuid())
+  name                  String?
+  email                 String                 @unique
+  emailVerified         DateTime?
+  image                 String?
+  password              String?                // For Credentials Auth
+  role                  Role                   @default(USER)
+  subscriptionTier      SubscriptionTier       @default(FREE)
+  recommendationCredits Int                    @default(3) // Free 3 credits on signup
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  wishlists             Wishlist[]
+  recommendationLogs    RecommendationLog[]
+  transactions          PaymentTransaction[]
+
+  @@map("users")
+}
+
+// ==========================================
+// 2. PERFUME CATALOG & NOTES
+// ==========================================
+
+enum GenderTarget {
+  UNISEX
+  MALE
+  FEMALE
+}
+
+enum NoteCategory {
+  TOP
+  HEART
+  BASE
+}
+
+model Brand {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  logoUrl     String?
+  websiteUrl  String?
+  perfumes    Perfume[]
+
+  @@map("brands")
+}
+
+model FragranceNote {
+  id          String        @id @default(cuid())
+  name        String        @unique // e.g. "Vanilla", "Bergamot", "Oud"
+  slug        String        @unique
+  family      String        // e.g. "Citrus", "Woody", "Amber", "Floral", "Gourmand"
+  description String?
+  perfumes    PerfumeNote[]
+
+  @@map("fragrance_notes")
+}
+
+model Perfume {
+  id                 String              @id @default(cuid())
+  title              String
+  slug               String              @unique
+  brandId            String
+  brand              Brand               @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  description        String
+  gender             GenderTarget        @default(UNISEX)
+  priceRange         String              // e.g., "$$", "$$$", "$$$$"
+  rating             Float               @default(4.5)
+  imageUrl           String
+  
+  // Occasion & Season suitability weights (0 - 10)
+  seasonSummer       Int                 @default(5)
+  seasonWinter       Int                 @default(5)
+  seasonSpring       Int                 @default(5)
+  seasonAutumn       Int                 @default(5)
+  
+  occasionOffice     Int                 @default(5)
+  occasionDateNight  Int                 @default(5)
+  occasionCasual     Int                 @default(5)
+  occasionParty      Int                 @default(5)
+
+  // External Purchase/Affiliate Redirect Links
+  amazonUrl          String?
+  flipkartUrl        String?
+  officialUrl        String?
+
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  notes              PerfumeNote[]
+  wishlists          Wishlist[]
+
+  @@map("perfumes")
+}
+
+// Junction model linking Perfumes to Notes with pyramid classification (TOP, HEART, BASE)
+model PerfumeNote {
+  id            String       @id @default(cuid())
+  perfumeId     String
+  perfume       Perfume      @relation(fields: [perfumeId], references: [id], onDelete: Cascade)
+  noteId        String
+  note          FragranceNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  type          NoteCategory // TOP, HEART, BASE
+
+  @@unique([perfumeId, noteId, type])
+  @@map("perfume_notes")
+}
+
+// ==========================================
+// 3. WISHLIST
+// ==========================================
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  perfumeId String
+  perfume   Perfume  @relation(fields: [perfumeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, perfumeId])
+  @@map("wishlists")
+}
+
+// ==========================================
+// 4. RECOMMENDATION LOGS & FEEDBACK
+// ==========================================
+
+model RecommendationLog {
+  id               String   @id @default(cuid())
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  rawPrompt        String?  // Natural language user input
+  parsedPreferences Json    // Zod parsed structured input
+  recommendedIds   String[] // Array of Perfume IDs recommended
+  aiExplanation    String?  // AI generated explanation
+  feedbackRating   Int?     // User rating (1 to 5 stars)
+  createdAt        DateTime @default(now())
+
+  @@map("recommendation_logs")
+}
+
+// ==========================================
+// 5. PAYMENT & SUBSCRIPTION TRANSACTIONS
+// ==========================================
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model PaymentTransaction {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount        Float
+  currency      String        @default("INR")
+  paymentMethod String        // e.g. "STRIPE", "RAZORPAY"
+  paymentId     String?       @unique // External transaction reference ID
+  status        PaymentStatus @default(PENDING)
+  creditsAdded  Int           @default(10)
+  createdAt     DateTime      @default(now())
+
+  @@map("payment_transactions")
+}
