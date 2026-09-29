@@ -24,6 +24,9 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
+import { useRouter } from 'next/navigation';
+import { getRecommendationsAction } from '@/app/actions/recommendActions';
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Mode = 'ai' | 'guided';
@@ -203,6 +206,7 @@ function StepProgress({ step, total }: { step: number; total: number }) {
 // ─── Main Client Component ────────────────────────────────────────────────────
 
 export function RecommendClient() {
+  const router = useRouter();
   const [mode, setMode] = useState<Mode>('ai');
   const [isPending, startTransition] = useTransition();
 
@@ -233,9 +237,23 @@ export function RecommendClient() {
   }
 
   function handleGuidedSubmit() {
-    startTransition(() => {
-      // Will wire to recommendation engine in Phase 3
-      console.log('Guided form submitted:', form);
+    startTransition(async () => {
+      const inputData = {
+        gender: form.gender || 'UNISEX',
+        season: form.season || undefined,
+        occasion: form.occasion || undefined,
+        budget: form.budget || undefined,
+        intensity: form.intensity,
+      };
+
+      const res = await getRecommendationsAction(inputData);
+      if (res.success && res.results) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('aura_results', JSON.stringify(res.results));
+          sessionStorage.setItem('aura_prompt', `${form.season || ''} ${form.occasion || ''} (${form.gender})`);
+        }
+        router.push('/results');
+      }
     });
   }
 
