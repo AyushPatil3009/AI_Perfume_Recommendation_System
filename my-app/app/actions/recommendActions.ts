@@ -1,6 +1,7 @@
 'use server';
 
 import { PerfumePreferenceSchema, PerfumeRecommendationResult } from '@/app/types/recommendation';
+import { parseUserPromptWithGemini, rankAndExplainWithGemini } from '@/app/services/geminiService';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
@@ -26,19 +27,40 @@ export async function getRecommendationsAction(inputData: unknown): Promise<{
   success: boolean;
   message?: string;
   results?: PerfumeRecommendationResult[];
+  vibeSummary?: string;
 }> {
   try {
-    const parsed = PerfumePreferenceSchema.safeParse(inputData);
-    if (!parsed.success) {
+    const rawInput = (inputData && typeof inputData === 'object') ? inputData : {};
+    let parsedInput = PerfumePreferenceSchema.safeParse(rawInput);
+
+    let userPromptText = (rawInput as { userPrompt?: string }).userPrompt;
+
+    // ─── Phase 1: If Natural Text Prompt provided, parse with Gemini first ───
+    if (userPromptText && userPromptText.trim().length >= 5) {
+      console.log('🤖 Parsing natural text prompt with Gemini AI:', userPromptText);
+      const aiExtracted = await parseUserPromptWithGemini(userPromptText);
+
+      // Smart Intent Guard check
+      if (aiExtracted.isOffTopic) {
+        return {
+          success: false,
+          message: "Please describe a mood, season, memory, or scent preference (e.g. 'cozy rainy evening date' or 'fresh citrus office scent').",
+        };
+      }
+
+      parsedInput = PerfumePreferenceSchema.safeParse(aiExtracted);
+    }
+
+    if (!parsedInput.success) {
       return {
         success: false,
-        message: parsed.error.issues[0]?.message || 'Invalid preferences.',
+        message: parsedInput.error.issues[0]?.message || 'Invalid preferences.',
       };
     }
 
-    const { gender, season, occasion, price, budget, intensity, note } = parsed.data;
+    const { gender, season, occasion, price, budget, intensity, note, userPrompt } = parsedInput.data;
 
-    // 1. Hard Constraints
+    // ─── Phase 2: Soft SQL Scoring against PostgreSQL ─────────────────────────
     const genderCondition: Prisma.Sql[] = [];
     if (gender) {
       const allowed = parseGender(gender);
@@ -57,7 +79,7 @@ export async function getRecommendationsAction(inputData: unknown): Promise<{
       } else if (rawPrice === '$$$') {
         maxPriceCondition = Prisma.sql`AND approx_price <= 200`;
       } else if (rawPrice === '$$$$') {
-        maxPriceCondition = Prisma.empty; // High-end allows all upper prices
+        maxPriceCondition = Prisma.empty;
       } else {
         const numPrice = typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice).replace(/[^\d.]/g, ''));
         if (!isNaN(numPrice) && numPrice > 0) {
@@ -66,7 +88,6 @@ export async function getRecommendationsAction(inputData: unknown): Promise<{
       }
     }
 
-    // 2. Soft SQL Scoring
     const seasonTerm = season ? `%${clean(season)}%` : null;
     const occasionTerm = occasion ? `%${clean(occasion)}%` : null;
     const intensityTerm = intensity ? `%${clean(intensity)}%` : null;
@@ -97,38 +118,22 @@ export async function getRecommendationsAction(inputData: unknown): Promise<{
 
     const candidates = await prisma.$queryRaw<Record<string, unknown>[]>(query);
 
-    // Format top 5 candidates for UI
-    const results: PerfumeRecommendationResult[] = candidates.slice(0, 5).map((row, idx) => {
-      const accords = [row.mainaccord1, row.mainaccord2, row.mainaccord3].filter(Boolean) as string[];
-      const rating = row.rating_value ? Number(row.rating_value) : 4.5;
-      const score = Math.min(99, Math.round(85 + (5 - idx) * 2.5 + (rating >= 4.5 ? 2 : 0)));
-
-      return {
-        id: Number(row.id),
-        perfume: String(row.perfume || 'Unknown Perfume'),
-        brand: String(row.brand || 'Luxury House'),
-        gender: String(row.gender || 'Unisex'),
-        matchScore: score,
-        approx_price: row.approx_price ? Number(row.approx_price) : null,
-        rating_value: rating,
-        top: row.top ? String(row.top) : null,
-        middle: row.middle ? String(row.middle) : null,
-        base: row.base ? String(row.base) : null,
-        mainaccords: accords,
-        aiExplanation: `Recommended for ${clean(season) || 'all season'} ${clean(occasion) || 'daily wear'} featuring standout accords of ${accords.join(', ') || 'luxurious notes'}.`,
-        buyUrl: row.url ? String(row.url) : null,
-      };
-    });
+    // ─── Phase 3: Gemini Sommelier Reranking & Custom Explanations ───────────
+    const vibeDescription = userPrompt || `${season || 'All-Season'} ${occasion || 'Daily'} (${gender || 'Unisex'}) ${note ? 'with notes of ' + note : ''}`;
+    
+    console.log('🤖 Reranking 20 candidates and generating explanations with Gemini...');
+    const results = await rankAndExplainWithGemini(vibeDescription, candidates);
 
     return {
       success: true,
       results,
+      vibeSummary: vibeDescription,
     };
   } catch (error) {
-    console.error('❌ Error getting recommendations:', error);
+    console.error('❌ Error in getRecommendationsAction:', error);
     return {
       success: false,
-      message: 'Failed to retrieve recommendations.',
+      message: 'Failed to retrieve AI recommendations.',
     };
   }
 }

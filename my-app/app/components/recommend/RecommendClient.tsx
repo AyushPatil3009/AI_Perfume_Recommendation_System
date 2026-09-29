@@ -232,11 +232,15 @@ export function RecommendClient() {
     '🌸 Light floral spring wedding guest',
   ];
 
+  const [aiError, setAiError] = useState<string | null>(null);
+
   function handleExamplePrompt(p: string) {
     setAiPrompt(p.replace(/^[^\s]+\s/, ''));
+    setAiError(null);
   }
 
   function handleGuidedSubmit() {
+    setAiError(null);
     startTransition(async () => {
       const inputData = {
         gender: form.gender || 'UNISEX',
@@ -253,13 +257,25 @@ export function RecommendClient() {
           sessionStorage.setItem('aura_prompt', `${form.season || ''} ${form.occasion || ''} (${form.gender})`);
         }
         router.push('/results');
+      } else {
+        setAiError(res.message || 'Failed to get recommendations.');
       }
     });
   }
 
   function handleAiSubmit() {
-    startTransition(() => {
-      console.log('AI prompt submitted:', aiPrompt);
+    setAiError(null);
+    startTransition(async () => {
+      const res = await getRecommendationsAction({ userPrompt: aiPrompt });
+      if (res.success && res.results) {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('aura_results', JSON.stringify(res.results));
+          sessionStorage.setItem('aura_prompt', res.vibeSummary || aiPrompt);
+        }
+        router.push('/results');
+      } else {
+        setAiError(res.message || 'Please provide a valid scent description.');
+      }
     });
   }
 
@@ -348,6 +364,12 @@ export function RecommendClient() {
                   Clear
                 </button>
               </div>
+
+              {aiError && (
+                <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-500/10 p-3.5 text-xs text-rose-300">
+                  {aiError}
+                </div>
+              )}
             </div>
           </FadeIn>
 
