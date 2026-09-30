@@ -1,42 +1,42 @@
 import { Navbar } from './components/Navbar';
 import { AmbientFragranceParticles } from './components/AmbientFragranceParticles';
-import { Sparkles, ArrowRight, Compass, ShieldCheck, Flame, ExternalLink, Zap } from 'lucide-react';
+import { Sparkles, ArrowRight, Compass, ShieldCheck, Flame, ExternalLink, Zap, Award, Crown, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
   const fragranceFamilies = [
     {
-      name: 'Fresh & Citrus',
-      notes: 'Bergamot, Lemon, Grapefruit, Sea Salt',
-      vibe: 'Invigorating, Breezy, Summer Mornings',
+      name: 'Fresh & Mediterranean Citrus',
+      notes: 'Calabrian Bergamot, Neroli, Sea Salt, Mandarin',
+      vibe: 'Invigorating, Luminous, Sunlit Morning',
       image: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?q=80&w=600&auto=format&fit=crop',
-      color: 'from-amber-400/20 to-yellow-600/10',
+      color: 'from-[#C59B4B]/15 to-[#FAF7F2]',
     },
     {
-      name: 'Woody & Earthy',
-      notes: 'Oud, Sandalwood, Cedar, Patchouli',
-      vibe: 'Mysterious, Elegant, Deep Forest',
+      name: 'Royal Oud & Rare Woods',
+      notes: 'Aged Cambodian Oud, Sandalwood, Cedar, Vetiver',
+      vibe: 'Majestic, Opulent, Imperial Palace',
       image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=600&auto=format&fit=crop',
-      color: 'from-amber-700/20 to-orange-950/20',
+      color: 'from-[#704C16]/15 to-[#FAF7F2]',
     },
     {
-      name: 'Warm Gourmand Vanilla',
-      notes: 'Bourbon Vanilla, Tonka Bean, Rum, Tobacco',
-      vibe: 'Cozy, Intimate, Date Nights',
+      name: 'Warm Amber & Bourbon Vanilla',
+      notes: 'Madagascar Vanilla, Tonka Bean, Benzoin, Amber Resin',
+      vibe: 'Sensual, Intimate, Velvet Evening',
       image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?q=80&w=600&auto=format&fit=crop',
-      color: 'from-yellow-500/20 to-amber-900/20',
+      color: 'from-[#C59B4B]/20 to-[#FAF7F2]',
     },
     {
-      name: 'Opulent Floral',
-      notes: 'Damask Rose, Jasmine, Lavender, Peony',
-      vibe: 'Romantic, Sophisticated, Spring Gardens',
+      name: 'Opulent Rose & Floral Damascena',
+      notes: 'Grasse Rose, Jasmine Sambac, Iris, Peony',
+      vibe: 'Sophisticated, Aristocratic, Royal Bloom',
       image: 'https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?q=80&w=600&auto=format&fit=crop',
-      color: 'from-rose-500/10 to-amber-500/10',
+      color: 'from-[#C59B4B]/15 to-[#FAF7F2]',
     }
   ];
 
   return (
-    <div className="relative min-h-screen bg-zinc-950 text-zinc-100 selection:bg-amber-400 selection:text-zinc-950">
+    <div className="relative min-h-screen bg-[#FAF7F2] text-[#1C1610] selection:bg-[#C59B4B] selection:text-white">
       {/* Floating Animated Gold Particles & Glow Backdrop */}
       <AmbientFragranceParticles />
 
@@ -44,74 +44,122 @@ export default function Home() {
       <Navbar />
 
       <main className="relative z-10">
-        {/* HERO SECTION */}
-        <section id="hero" className="mx-auto max-w-7xl px-6 pt-20 pb-24 text-center md:pt-32 md:pb-32">
-          {/* Subtle Tag Badge */}
-          <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 backdrop-blur-md">
-            <Zap className="h-4 w-4 text-amber-400 animate-pulse" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-amber-300">
-              Next-Gen AI Olfactory Intelligence
-            </span>
-          </div>
+        {/* ─── HERO SECTION ─────────────────────────────────────────────────── */}
+        <section id="hero" className="mx-auto max-w-7xl px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            {/* Left Hero Text Content */}
+            <div className="lg:col-span-7 text-left space-y-6">
+              {/* Royal Badge */}
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#C59B4B]/35 bg-[#C59B4B]/10 px-4 py-1.5 backdrop-blur-md">
+                <Crown className="h-4 w-4 text-[#A87C30] animate-pulse" />
+                <span className="text-xs font-semibold uppercase tracking-widest text-[#704C16] font-mono">
+                  Haute Parfumerie AI Sommelier
+                </span>
+              </div>
 
-          {/* Main Hero Headline */}
-          <h1 className="font-serif text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl">
-            Discover Your <br />
-            <span className="golden-text-gradient">Signature Fragrance</span>
-          </h1>
+              {/* Main Hero Headline */}
+              <h1 className="font-serif text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl text-[#1C1610] leading-[1.1]">
+                Curate Your <br />
+                <span className="golden-text-gradient">Royal Scent Signature</span>
+              </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400 sm:text-xl font-light leading-relaxed">
-            Stop guessing scent notes. Tell our AI your exact vibe, season, or memory, and get mathematically matched recommendations with direct luxury store links.
-          </p>
+              <p className="max-w-xl text-lg text-stone-600 sm:text-xl font-light leading-relaxed">
+                Discover bespoke fragrance formulas crafted with mathematical precision. Describe your mood, occasion, or rare note cravings, and unlock 5 bespoke luxury matches.
+              </p>
 
-          {/* Dual Action CTAs */}
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/recommend"
-              className="group flex h-14 w-full items-center justify-center gap-3 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 px-8 font-semibold text-zinc-950 shadow-xl shadow-amber-500/20 transition-all hover:scale-105 hover:shadow-amber-500/30 sm:w-auto"
-            >
-              <Sparkles className="h-5 w-5 text-zinc-950" />
-              <span>Try AI Scent Recommendation</span>
-              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
+              {/* Dual Action CTAs */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center gap-4">
+                <Link
+                  href="/recommend"
+                  className="group flex h-14 w-full sm:w-auto items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B] px-8 font-semibold text-white shadow-xl shadow-[#C59B4B]/30 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-[#C59B4B]/40"
+                >
+                  <Sparkles className="h-5 w-5 text-[#FFF5DC]" />
+                  <span>Begin Scent Consultation</span>
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Link>
 
-            <Link
-              href="#how-it-works"
-              className="flex h-14 w-full items-center justify-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-8 font-medium text-zinc-300 backdrop-blur-md transition-all hover:border-amber-500/30 hover:bg-zinc-800/80 hover:text-white sm:w-auto"
-            >
-              <span>How Match Algorithm Works</span>
-            </Link>
+                <Link
+                  href="#how-it-works"
+                  className="flex h-14 w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-[#C59B4B]/30 bg-white/90 px-8 font-semibold text-stone-800 backdrop-blur-md transition-all hover:border-[#C59B4B] hover:bg-white hover:text-[#9A7025] hover:shadow-md shadow-sm"
+                >
+                  <span>How Algorithm Matches</span>
+                </Link>
+              </div>
+
+              {/* Trust Indicators */}
+              <div className="pt-4 flex items-center gap-6 text-xs text-stone-500 font-medium">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-[#C59B4B]" /> 100% Unbiased AI Match
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-[#C59B4B]" /> Verified Olfactory Notes
+                </span>
+              </div>
+            </div>
+
+            {/* Right Hero Visual Showcase: Ultra-Luxury Flacon Montage */}
+            <div className="lg:col-span-5 relative">
+              {/* Golden Ambient Radiance Behind Flacon */}
+              <div className="pointer-events-none absolute -inset-4 rounded-3xl bg-gradient-to-tr from-[#C59B4B]/20 via-[#E6C675]/20 to-transparent blur-3xl" />
+
+              <div className="moving-border-card group relative">
+                <div className="relative z-10 w-full overflow-hidden rounded-[calc(1.5rem-1.5px)] bg-white/95 p-4 sm:p-5 shadow-2xl backdrop-blur-xl">
+                  {/* Luxury Flacon Image */}
+                  <div className="relative h-80 sm:h-96 w-full overflow-hidden rounded-2xl bg-stone-100">
+                    <img
+                      src="https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=800&auto=format&fit=crop"
+                      alt="Ultra Luxury Perfume Flacon"
+                      className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    
+                    {/* Floating Luxury Tag */}
+                    <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-[#F7E7C4]">Bespoke Formula</span>
+                        <p className="font-serif text-lg font-bold">White Oud & 24K Amber</p>
+                      </div>
+                      <span className="rounded-full bg-[#C59B4B]/90 backdrop-blur-md px-3 py-1 text-xs font-bold font-mono">
+                        99% Resonance
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           {/* Social Proof Stats */}
-          <div className="mt-16 grid grid-cols-2 gap-6 border-t border-zinc-800/60 pt-10 sm:grid-cols-4">
-            <div>
+          <div className="mt-16 grid grid-cols-2 gap-6 border-t border-stone-200/80 pt-10 sm:grid-cols-4">
+            <div className="rounded-2xl bg-white/70 border border-stone-200/70 p-4 shadow-sm">
               <span className="font-serif text-3xl font-bold golden-text-gradient">98.4%</span>
-              <span className="block text-xs uppercase text-zinc-500 mt-1">Match Accuracy</span>
+              <span className="block text-xs uppercase text-stone-500 mt-1 font-semibold">Match Accuracy</span>
             </div>
-            <div>
-              <span className="font-serif text-3xl font-bold text-zinc-200">30+</span>
-              <span className="block text-xs uppercase text-zinc-500 mt-1">Curated Luxury Perfumes</span>
+            <div className="rounded-2xl bg-white/70 border border-stone-200/70 p-4 shadow-sm">
+              <span className="font-serif text-3xl font-bold text-stone-900">100+</span>
+              <span className="block text-xs uppercase text-stone-500 mt-1 font-semibold">Luxury Flacons Mapped</span>
             </div>
-            <div>
-              <span className="font-serif text-3xl font-bold text-zinc-200">100%</span>
-              <span className="block text-xs uppercase text-zinc-500 mt-1">Non-Ecommerce / Independent</span>
+            <div className="rounded-2xl bg-white/70 border border-stone-200/70 p-4 shadow-sm">
+              <span className="font-serif text-3xl font-bold text-stone-900">100%</span>
+              <span className="block text-xs uppercase text-stone-500 mt-1 font-semibold">Independent & Unbiased</span>
             </div>
-            <div>
+            <div className="rounded-2xl bg-white/70 border border-stone-200/70 p-4 shadow-sm">
               <span className="font-serif text-3xl font-bold golden-text-gradient">Instant</span>
-              <span className="block text-xs uppercase text-zinc-500 mt-1">Buy Store Redirection</span>
+              <span className="block text-xs uppercase text-stone-500 mt-1 font-semibold">Store Link Redirection</span>
             </div>
           </div>
         </section>
 
-        {/* FRAGRANCE FAMILIES GRID */}
-        <section id="families" className="mx-auto max-w-7xl px-6 py-20 border-t border-zinc-900">
+        {/* ─── FRAGRANCE FAMILIES GRID ───────────────────────────────────────── */}
+        <section id="families" className="mx-auto max-w-7xl px-6 py-20 border-t border-stone-200/80">
           <div className="mb-12 text-center">
-            <h2 className="font-serif text-3xl font-bold sm:text-4xl text-zinc-100">
+            <h2 className="font-serif text-3xl font-bold sm:text-4xl text-[#1C1610]">
               Explore Olfactory <span className="golden-text-gradient">Fragrance Families</span>
             </h2>
-            <p className="mt-3 text-zinc-400 font-light">
-              Every master perfume is classified across core note structures. Which accord defines you?
+            <p className="mt-3 text-stone-600 font-light">
+              Every master perfume is classified across core note structures. Which accord defines your aura?
             </p>
           </div>
 
@@ -119,20 +167,20 @@ export default function Home() {
             {fragranceFamilies.map((family, idx) => (
               <div
                 key={idx}
-                className="group relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-900/50 p-6 backdrop-blur-md transition-all hover:border-amber-500/40 hover:-translate-y-2 hover:shadow-2xl hover:shadow-amber-500/10"
+                className="group relative overflow-hidden rounded-2xl border border-[#C59B4B]/25 bg-white p-6 shadow-sm transition-all hover:border-[#C59B4B]/60 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#C59B4B]/10"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${family.color} opacity-40 group-hover:opacity-70 transition-opacity`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${family.color} opacity-30 group-hover:opacity-60 transition-opacity`} />
                 <div className="relative z-10">
-                  <span className="inline-block text-xs font-semibold uppercase tracking-widest text-amber-400">
+                  <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#9A7025]">
                     {family.vibe}
                   </span>
-                  <h3 className="mt-3 font-serif text-xl font-bold text-white">{family.name}</h3>
-                  <p className="mt-2 text-xs text-zinc-400 leading-relaxed font-mono">
-                    <span className="text-amber-300 font-semibold">Notes:</span> {family.notes}
+                  <h3 className="mt-3 font-serif text-xl font-bold text-stone-900">{family.name}</h3>
+                  <p className="mt-2 text-xs text-stone-600 leading-relaxed font-sans">
+                    <span className="text-[#9A7025] font-semibold">Notes:</span> {family.notes}
                   </p>
                   <Link
                     href="/recommend"
-                    className="mt-6 inline-flex items-center gap-2 text-xs font-semibold text-amber-300 hover:text-amber-200"
+                    className="mt-6 inline-flex items-center gap-2 text-xs font-semibold text-[#9A7025] hover:text-[#704C16] transition-colors"
                   >
                     <span>Match this family</span>
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -143,44 +191,44 @@ export default function Home() {
           </div>
         </section>
 
-        {/* HOW IT WORKS SECTION */}
-        <section id="how-it-works" className="mx-auto max-w-7xl px-6 py-24 border-t border-zinc-900">
+        {/* ─── HOW IT WORKS SECTION ─────────────────────────────────────────── */}
+        <section id="how-it-works" className="mx-auto max-w-7xl px-6 py-24 border-t border-stone-200/80">
           <div className="mb-16 text-center">
-            <h2 className="font-serif text-3xl font-bold sm:text-4xl">
+            <h2 className="font-serif text-3xl font-bold sm:text-4xl text-[#1C1610]">
               Transparent <span className="golden-text-gradient">AI Recommendation Pipeline</span>
             </h2>
-            <p className="mt-3 text-zinc-400 max-w-xl mx-auto font-light">
+            <p className="mt-3 text-stone-600 max-w-xl mx-auto font-light">
               We separate AI intent parsing from deterministic database matching so you get authentic recommendations without bias.
             </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            <div className="glass-card glass-card-hover rounded-2xl p-8 text-left relative">
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold font-mono text-xl">
+            <div className="glass-card glass-card-hover rounded-2xl p-8 text-left relative bg-white">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C59B4B]/15 border border-[#C59B4B]/35 text-[#9A7025] font-bold font-mono text-xl shadow-sm">
                 01
               </div>
-              <h3 className="font-serif text-xl font-bold text-white mb-2">Natural Vibe Input</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed">
+              <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">Natural Vibe Input</h3>
+              <p className="text-sm text-stone-600 leading-relaxed">
                 Describe a mood, rainy autumn morning, cozy coffee date, or select preferences via interactive sliders.
               </p>
             </div>
 
-            <div className="glass-card glass-card-hover rounded-2xl p-8 text-left relative">
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold font-mono text-xl">
+            <div className="glass-card glass-card-hover rounded-2xl p-8 text-left relative bg-white">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C59B4B]/15 border border-[#C59B4B]/35 text-[#9A7025] font-bold font-mono text-xl shadow-sm">
                 02
               </div>
-              <h3 className="font-serif text-xl font-bold text-white mb-2">Note Overlap Scoring</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed">
+              <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">Note Overlap Scoring</h3>
+              <p className="text-sm text-stone-600 leading-relaxed">
                 Our recommendation engine matches accords, season weights, and occasion intensity against our fragrance database.
               </p>
             </div>
 
-            <div className="glass-card glass-card-hover rounded-2xl p-8 text-left relative">
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold font-mono text-xl">
+            <div className="glass-card glass-card-hover rounded-2xl p-8 text-left relative bg-white">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-[#C59B4B]/15 border border-[#C59B4B]/35 text-[#9A7025] font-bold font-mono text-xl shadow-sm">
                 03
               </div>
-              <h3 className="font-serif text-xl font-bold text-white mb-2">Top 5 + External Buy Links</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed">
+              <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">Top 5 + External Buy Links</h3>
+              <p className="text-sm text-stone-600 leading-relaxed">
                 Get ranked matches with personalized AI explanations and direct links to Amazon, Flipkart, or Brand official stores.
               </p>
             </div>
@@ -188,14 +236,14 @@ export default function Home() {
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="border-t border-zinc-900 bg-zinc-950/90 py-10 text-center text-xs text-zinc-500">
+      {/* ─── FOOTER ───────────────────────────────────────────────────────── */}
+      <footer className="border-t border-stone-200/80 bg-white/90 py-10 text-center text-xs text-stone-500">
         <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>© 2026 Aura Scent AI. Independent Perfume Recommendation Platform. Not an e-commerce store.</p>
+          <p>© 2026 Aura Scent AI. Royal Fragrance Recommendation Atelier.</p>
           <div className="flex gap-6">
-            <Link href="#" className="hover:text-amber-400">Privacy Policy</Link>
-            <Link href="#" className="hover:text-amber-400">Terms of Service</Link>
-            <Link href="#" className="hover:text-amber-400">Database API</Link>
+            <Link href="#" className="hover:text-[#9A7025] transition-colors">Privacy Policy</Link>
+            <Link href="#" className="hover:text-[#9A7025] transition-colors">Terms of Service</Link>
+            <Link href="#" className="hover:text-[#9A7025] transition-colors">Database API</Link>
           </div>
         </div>
       </footer>

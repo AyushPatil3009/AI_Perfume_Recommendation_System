@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RecommendPage() {
   return (
-    <div className="relative min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="relative min-h-screen bg-[#FAF7F2] text-[#1C1610]">
       <AmbientFragranceParticles />
       <Navbar />
       <RecommendClient />
