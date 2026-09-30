@@ -24,6 +24,8 @@ const loginServerSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
+import { cookies } from 'next/headers';
+
 export type AuthActionResult = {
   success: boolean;
   message?: string;
@@ -71,22 +73,32 @@ export async function registerUserAction(formData: {
     // 3. Hash Password securely with bcrypt (10 rounds)
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Create User in PostgreSQL with 3 free recommendation credits
+    // 4. Create User in PostgreSQL with 0 credits (pay-per-request model)
     const newUser = await prisma.user.create({
       data: {
         name,
         email: normalizedEmail,
         password: hashedPassword,
         subscriptionTier: 'FREE',
-        recommendationCredits: 3,
+        recommendationCredits: 0,
       },
     });
 
     console.log(`✅ Successfully registered user in DB: ${newUser.email}`);
 
+    // 5. Set session cookie
+    const cookieStore = await cookies();
+    cookieStore.set('aura_session', newUser.id, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+
     return {
       success: true,
-      message: 'Account created successfully! You received 3 free AI recommendation credits.',
+      message: 'Account created successfully!',
       user: {
         id: newUser.id,
         name: newUser.name,
@@ -147,6 +159,16 @@ export async function loginUserAction(formData: {
 
     console.log(`✅ User logged in successfully: ${user.email}`);
 
+    // Set session cookie
+    const cookieStore = await cookies();
+    cookieStore.set('aura_session', user.id, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+    });
+
     return {
       success: true,
       message: 'Signed in successfully!',
@@ -164,5 +186,17 @@ export async function loginUserAction(formData: {
       success: false,
       message: 'Something went wrong on the server. Please try again.',
     };
+  }
+}
+
+// ─── 3. Logout Action ─────────────────────────────────────────────────────────
+
+export async function logoutUserAction(): Promise<{ success: boolean }> {
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete('aura_session');
+    return { success: true };
+  } catch {
+    return { success: false };
   }
 }
