@@ -15,7 +15,8 @@ model User {
   password              String?
   role                  Role                 @default(USER)
   subscriptionTier      SubscriptionTier     @default(FREE)
-  recommendationCredits Int                  @default(3)
+  recommendationCredits Int                  @default(0)
+  stripeCustomerId      String?
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
   transactions          PaymentTransaction[]
@@ -98,31 +99,35 @@ model Wishlist {
 }
 
 model RecommendationLog {
-  id                String   @id @default(cuid())
-  userId            String?
-  rawPrompt         String?
-  parsedPreferences Json
-  recommendedIds    String[]
-  aiExplanation     String?
-  feedbackRating    Int?
-  createdAt         DateTime @default(now())
-  user              User?    @relation(fields: [userId], references: [id])
-
+  id                String              @id @default(cuid())
+  userId            String
+  transactionId     String?             @unique
+  rawPrompt         String              // The user's input preferences
+  resultsJson       Json                // The full array of 5 perfumes from Gemini
+  createdAt         DateTime            @default(now())
+  
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction       PaymentTransaction? @relation(fields: [transactionId], references: [id])
   @@map("recommendation_logs")
 }
 
-model PaymentTransaction {
-  id            String        @id @default(cuid())
-  userId        String
-  amount        Float
-  currency      String        @default("INR")
-  paymentMethod String
-  paymentId     String?       @unique
-  status        PaymentStatus @default(PENDING)
-  creditsAdded  Int           @default(10)
-  createdAt     DateTime      @default(now())
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+model PaymentTransaction {
+  id                String             @id @default(cuid())
+  userId            String?
+  customerEmail     String?
+  amount            Float
+  currency          String             @default("USD")
+  paymentMethod     String             @default("STRIPE")
+  paymentId         String?            @unique
+  stripeSessionId   String?            @unique
+  promptMetadata    String?
+  status            PaymentStatus      @default(PENDING)
+  creditsAdded      Int                @default(1)
+  createdAt         DateTime           @default(now())
+  
+  user              User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recommendationLog RecommendationLog? // Links to the generated results
   @@map("payment_transactions")
 }
 
