@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { sendWelcomeEmail } from '@/app/lib/email';
 
 const connectionString = process.env.DATABASE_URL;
 const pool = new Pool({ connectionString });
@@ -106,6 +107,14 @@ export async function GET(request: NextRequest) {
         },
       });
       console.log(`✅ Created new Google OAuth user in DB: ${user.email} (ID: ${user.id})`);
+
+      // Dispatch luxury welcome email asynchronously
+      sendWelcomeEmail({
+        to: user.email,
+        name: user.name,
+      }).catch((emailErr) => {
+        console.warn('⚠️ Welcome email could not be delivered to Google user:', emailErr);
+      });
     } else {
       // Existing user: update name/avatar if missing
       user = await prisma.user.update({

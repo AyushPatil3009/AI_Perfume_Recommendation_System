@@ -25,6 +25,7 @@ const loginServerSchema = z.object({
 });
 
 import { cookies } from 'next/headers';
+import { sendWelcomeEmail } from '@/app/lib/email';
 
 export type AuthActionResult = {
   success: boolean;
@@ -86,7 +87,15 @@ export async function registerUserAction(formData: {
 
     console.log(`✅ Successfully registered user in DB: ${newUser.email}`);
 
-    // 5. Set session cookie
+    // 5. Send welcome email (asynchronous / non-blocking)
+    sendWelcomeEmail({
+      to: newUser.email,
+      name: newUser.name,
+    }).catch((emailErr) => {
+      console.warn('⚠️ Welcome email could not be delivered:', emailErr);
+    });
+
+    // 6. Set session cookie
     const cookieStore = await cookies();
     cookieStore.set('aura_session', newUser.id, {
       httpOnly: false,

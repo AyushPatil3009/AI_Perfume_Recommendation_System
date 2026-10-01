@@ -4,6 +4,7 @@ import { stripe } from '@/app/lib/stripe';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { sendPrescriptionEmail } from '@/app/lib/email';
 
 const connectionString = process.env.DATABASE_URL;
 const pool = new Pool({ connectionString });
@@ -197,6 +198,19 @@ export async function verifyAndFulfillCheckoutAction(sessionId: string): Promise
       } catch (logErr) {
         console.error('❌ Could not save recommendation history to DB:', logErr);
       }
+    }
+
+    // 6. Dispatch luxury Scent Prescription & Receipt Email via Resend
+    if (recResponse.success && recResponse.results && customerEmail) {
+      sendPrescriptionEmail({
+        to: customerEmail,
+        name: session.customer_details?.name || undefined,
+        results: recResponse.results,
+        rawPrompt: recResponse.vibeSummary || undefined,
+        transactionId: transactionId || undefined,
+      }).catch((emailErr) => {
+        console.warn('⚠️ Prescription email could not be delivered:', emailErr);
+      });
     }
 
     return recResponse;
