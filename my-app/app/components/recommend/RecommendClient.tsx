@@ -22,15 +22,17 @@ import {
   CheckCircle2,
   Loader2,
   ChevronRight,
+  CreditCard,
+  Lock,
 } from 'lucide-react';
 
 import { useRouter } from 'next/navigation';
-import { getRecommendationsAction } from '@/app/actions/recommendActions';
+import { createCheckoutSessionAction } from '@/app/actions/stripeActions';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Mode = 'ai' | 'guided';
-type Step = 1 | 2 | 3 | 4 | 5;
+type Step = 1 | 2 | 3 | 4;
 
 interface GuidedForm {
   gender: 'MALE' | 'FEMALE' | 'UNISEX' | '';
@@ -39,6 +41,33 @@ interface GuidedForm {
   budget: '$' | '$$' | '$$$' | '$$$$' | '';
   intensity: number; // 1 to 5
 }
+
+const BUDGET_TIERS = [
+  {
+    key: '$',
+    range: 'Under $45',
+    title: 'Value & Daily',
+    desc: 'Great everyday budget staples & fresh mass-pleasers',
+  },
+  {
+    key: '$$',
+    range: 'Up to $95',
+    title: 'Designer Signature',
+    desc: 'Versatile classics from top fragrance houses',
+  },
+  {
+    key: '$$$',
+    range: 'Up to $200',
+    title: 'Premium Luxury',
+    desc: 'High longevity, complex notes & fine sillage',
+  },
+  {
+    key: '$$$$',
+    range: 'Any / $200+',
+    title: 'No Price Limit',
+    desc: 'All luxury, niche & master perfumery collections',
+  },
+] as const;
 
 // ─── Scroll Animation Hook ────────────────────────────────────────────────────
 
@@ -113,28 +142,28 @@ function SelectCard({
       onClick={onClick}
       className={`group relative w-full overflow-hidden rounded-2xl border p-5 text-left transition-all duration-300 hover:-translate-y-1 ${
         selected
-          ? 'border-amber-400/70 bg-amber-500/10 shadow-lg shadow-amber-500/20'
-          : 'border-zinc-800 bg-zinc-900/50 hover:border-amber-500/30 hover:bg-zinc-800/60'
+          ? 'border-[#C59B4B] bg-[#C59B4B]/10 shadow-lg shadow-[#C59B4B]/15 ring-1 ring-[#C59B4B]/40'
+          : 'border-stone-200 bg-white hover:border-[#C59B4B]/50 hover:bg-stone-50/80 shadow-sm'
       }`}
     >
       {selected && (
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-yellow-600/5 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#C59B4B]/10 to-[#FAF7F2] pointer-events-none" />
       )}
       <div className="relative z-10 flex items-center gap-4">
         <div
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-colors ${
             selected
-              ? 'border-amber-400/50 bg-amber-400/20 text-amber-300'
-              : 'border-zinc-700 bg-zinc-800 text-zinc-400 group-hover:border-amber-500/30 group-hover:text-amber-400'
+              ? 'border-[#C59B4B]/60 bg-[#C59B4B]/20 text-[#704C16]'
+              : 'border-stone-200 bg-stone-100 text-stone-600 group-hover:border-[#C59B4B]/40 group-hover:text-[#9A7025]'
           }`}
         >
           <Icon className="h-5 w-5" />
         </div>
         <div>
-          <p className={`font-semibold ${selected ? 'text-amber-200' : 'text-zinc-200'}`}>{label}</p>
-          {sublabel && <p className="text-xs text-zinc-500 mt-0.5">{sublabel}</p>}
+          <p className={`font-semibold ${selected ? 'text-[#704C16]' : 'text-stone-900'}`}>{label}</p>
+          {sublabel && <p className="text-xs text-stone-500 mt-0.5">{sublabel}</p>}
         </div>
-        {selected && <CheckCircle2 className="ml-auto h-5 w-5 text-amber-400 shrink-0" />}
+        {selected && <CheckCircle2 className="ml-auto h-5 w-5 text-[#C59B4B] shrink-0" />}
       </div>
     </button>
   );
@@ -152,9 +181,9 @@ function IntensitySlider({
   const labels = ['Very Light', 'Light', 'Moderate', 'Strong', 'Intense & Bold'];
   return (
     <div className="w-full">
-      <div className="flex justify-between mb-2 text-xs text-zinc-500">
+      <div className="flex justify-between mb-2 text-xs text-stone-500 font-medium">
         <span>Very Light</span>
-        <span className="text-amber-300 font-semibold">{labels[value - 1]}</span>
+        <span className="text-[#9A7025] font-bold font-mono text-sm">{labels[value - 1]}</span>
         <span>Intense & Bold</span>
       </div>
       <input
@@ -163,14 +192,14 @@ function IntensitySlider({
         max={5}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 rounded-full bg-zinc-800 cursor-pointer accent-amber-400"
+        className="w-full h-2 rounded-full bg-stone-200 cursor-pointer accent-[#C59B4B]"
       />
       <div className="flex justify-between mt-2">
         {[1, 2, 3, 4, 5].map((v) => (
           <div
             key={v}
-            className={`h-1.5 w-1.5 rounded-full transition-colors ${
-              v <= value ? 'bg-amber-400' : 'bg-zinc-700'
+            className={`h-2 w-2 rounded-full transition-colors ${
+              v <= value ? 'bg-[#C59B4B]' : 'bg-stone-300'
             }`}
           />
         ))}
@@ -187,16 +216,16 @@ function StepProgress({ step, total }: { step: number; total: number }) {
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} className="relative flex-1">
           <div
-            className={`h-1.5 rounded-full transition-all duration-500 ${
-              i < step ? 'bg-amber-400' : 'bg-zinc-800'
+            className={`h-2 rounded-full transition-all duration-500 ${
+              i < step ? 'bg-[#C59B4B]' : 'bg-stone-200'
             }`}
           />
           {i === step - 1 && (
-            <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 h-3.5 w-3.5 rounded-full border-2 border-amber-400 bg-zinc-950" />
+            <div className="absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 h-4 w-4 rounded-full border-2 border-[#C59B4B] bg-white shadow-md shadow-[#C59B4B]/30" />
           )}
         </div>
       ))}
-      <span className="text-xs text-zinc-500 ml-2 shrink-0">
+      <span className="text-xs font-semibold text-stone-500 ml-2 shrink-0 font-mono">
         {step}/{total}
       </span>
     </div>
@@ -207,8 +236,25 @@ function StepProgress({ step, total }: { step: number; total: number }) {
 
 export function RecommendClient() {
   const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; name?: string } | null | 'loading'>('loading');
   const [mode, setMode] = useState<Mode>('ai');
   const [isPending, startTransition] = useTransition();
+
+  // Check auth session
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('aura_user');
+        if (stored) {
+          setCurrentUser(JSON.parse(stored));
+        } else {
+          setCurrentUser(null);
+        }
+      } catch {
+        setCurrentUser(null);
+      }
+    }
+  }, []);
 
   // AI Mode
   const [aiPrompt, setAiPrompt] = useState('');
@@ -239,6 +285,13 @@ export function RecommendClient() {
     setAiError(null);
   }
 
+  function getUserSession() {
+    if (currentUser && currentUser !== 'loading') {
+      return { userId: currentUser.id, userEmail: currentUser.email };
+    }
+    return {};
+  }
+
   function handleGuidedSubmit() {
     setAiError(null);
     startTransition(async () => {
@@ -250,15 +303,17 @@ export function RecommendClient() {
         intensity: form.intensity,
       };
 
-      const res = await getRecommendationsAction(inputData);
-      if (res.success && res.results) {
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('aura_results', JSON.stringify(res.results));
-          sessionStorage.setItem('aura_prompt', `${form.season || ''} ${form.occasion || ''} (${form.gender})`);
-        }
-        router.push('/results');
+      const { userId, userEmail } = getUserSession();
+      const res = await createCheckoutSessionAction({
+        userId,
+        userEmail,
+        preferences: inputData,
+      });
+
+      if (res.success && res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
       } else {
-        setAiError(res.message || 'Failed to get recommendations.');
+        setAiError(res.message || 'Failed to initiate checkout.');
       }
     });
   }
@@ -266,15 +321,17 @@ export function RecommendClient() {
   function handleAiSubmit() {
     setAiError(null);
     startTransition(async () => {
-      const res = await getRecommendationsAction({ userPrompt: aiPrompt });
-      if (res.success && res.results) {
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('aura_results', JSON.stringify(res.results));
-          sessionStorage.setItem('aura_prompt', res.vibeSummary || aiPrompt);
-        }
-        router.push('/results');
+      const { userId, userEmail } = getUserSession();
+      const res = await createCheckoutSessionAction({
+        userId,
+        userEmail,
+        preferences: { userPrompt: aiPrompt },
+      });
+
+      if (res.success && res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
       } else {
-        setAiError(res.message || 'Please provide a valid scent description.');
+        setAiError(res.message || 'Failed to initiate checkout.');
       }
     });
   }
@@ -287,22 +344,73 @@ export function RecommendClient() {
     return true;
   }
 
+  if (currentUser === 'loading') {
+    return (
+      <main className="relative z-10 mx-auto max-w-4xl px-4 py-32 text-center">
+        <div className="inline-flex items-center gap-3 rounded-2xl border border-[#C59B4B]/30 bg-white/95 px-6 py-3 text-[#704C16] backdrop-blur-xl shadow-md">
+          <Loader2 className="h-5 w-5 animate-spin text-[#C59B4B]" />
+          <span className="text-sm font-mono">Verifying member session...</span>
+        </div>
+      </main>
+    );
+  }
+
+  if (currentUser === null) {
+    return (
+      <main className="relative z-10 mx-auto max-w-lg px-4 py-24 sm:px-6">
+        <FadeIn direction="up">
+          <div className="glass-card rounded-3xl p-8 md:p-10 text-center shadow-xl relative overflow-hidden bg-white/95">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B]" />
+            
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C59B4B]/10 border border-[#C59B4B]/30">
+              <Lock className="h-6 w-6 text-[#C59B4B]" />
+            </div>
+
+            <h1 className="font-serif text-2xl md:text-3xl font-bold text-stone-900 mb-2">
+              Members Only <span className="golden-text-gradient">Atelier</span>
+            </h1>
+            <p className="text-stone-600 text-sm font-light leading-relaxed mb-8">
+              Please sign in to access the Gemini AI Fragrance Sommelier and unlock bespoke scent curations.
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push('/login?redirect=/recommend')}
+                className="w-full flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B] font-semibold text-white shadow-lg shadow-[#C59B4B]/30 hover:scale-[1.02] transition-all"
+              >
+                <span>Sign In to Continue</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+
+              <button
+                onClick={() => router.push('/register')}
+                className="w-full flex h-12 items-center justify-center rounded-xl border border-stone-300 bg-white text-sm font-medium text-stone-700 hover:border-[#C59B4B] hover:text-[#9A7025] hover:bg-stone-50 transition-all shadow-sm"
+              >
+                Create an Account
+              </button>
+            </div>
+          </div>
+        </FadeIn>
+      </main>
+    );
+  }
+
   return (
     <main className="relative z-10 mx-auto max-w-4xl px-4 py-16 sm:px-6">
 
       {/* Page Header */}
       <FadeIn direction="up">
         <div className="text-center mb-14">
-          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 backdrop-blur-md">
-            <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
-            <span className="text-xs font-semibold uppercase tracking-widest text-amber-300">
+          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[#C59B4B]/35 bg-[#C59B4B]/10 px-4 py-1.5 backdrop-blur-md">
+            <Sparkles className="h-4 w-4 text-[#C59B4B] animate-pulse" />
+            <span className="text-xs font-semibold uppercase tracking-widest text-[#704C16] font-mono">
               Personalised AI Engine
             </span>
           </div>
-          <h1 className="font-serif text-4xl font-extrabold sm:text-5xl md:text-6xl">
+          <h1 className="font-serif text-4xl font-extrabold sm:text-5xl md:text-6xl text-stone-900">
             Find Your <span className="golden-text-gradient">Perfect Scent</span>
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-zinc-400 text-lg font-light leading-relaxed">
+          <p className="mx-auto mt-4 max-w-xl text-stone-600 text-lg font-light leading-relaxed">
             Describe your vibe in plain English, or walk through our guided questionnaire.
             Our engine will rank the best-matched luxury fragrances for you.
           </p>
@@ -311,13 +419,13 @@ export function RecommendClient() {
 
       {/* Mode Toggle */}
       <FadeIn direction="up" delay={100}>
-        <div className="glass-card rounded-2xl p-2 flex gap-2 mb-10">
+        <div className="glass-card rounded-2xl p-2 flex gap-2 mb-10 bg-white/90 shadow-sm border border-[#C59B4B]/20">
           <button
             onClick={() => setMode('ai')}
             className={`flex-1 flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-sm font-semibold transition-all duration-300 ${
               mode === 'ai'
-                ? 'bg-gradient-to-r from-amber-500/20 to-yellow-600/20 border border-amber-500/40 text-amber-300 shadow-lg shadow-amber-500/10'
-                : 'text-zinc-500 hover:text-zinc-300'
+                ? 'bg-gradient-to-r from-[#C59B4B]/15 to-[#D4AF37]/25 border border-[#C59B4B]/40 text-[#704C16] shadow-sm font-bold'
+                : 'text-stone-500 hover:text-stone-900'
             }`}
           >
             <Wand2 className="h-4 w-4" />
@@ -327,8 +435,8 @@ export function RecommendClient() {
             onClick={() => setMode('guided')}
             className={`flex-1 flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-sm font-semibold transition-all duration-300 ${
               mode === 'guided'
-                ? 'bg-gradient-to-r from-amber-500/20 to-yellow-600/20 border border-amber-500/40 text-amber-300 shadow-lg shadow-amber-500/10'
-                : 'text-zinc-500 hover:text-zinc-300'
+                ? 'bg-gradient-to-r from-[#C59B4B]/15 to-[#D4AF37]/25 border border-[#C59B4B]/40 text-[#704C16] shadow-sm font-bold'
+                : 'text-stone-500 hover:text-stone-900'
             }`}
           >
             <SlidersHorizontal className="h-4 w-4" />
@@ -341,11 +449,11 @@ export function RecommendClient() {
       {mode === 'ai' && (
         <div className="space-y-8">
           <FadeIn direction="up" delay={150}>
-            <div className="glass-card rounded-2xl p-6 md:p-8">
-              <label className="block font-serif text-xl font-bold text-zinc-100 mb-2">
+            <div className="glass-card rounded-2xl p-6 md:p-8 bg-white/95 border border-[#C59B4B]/25 shadow-md">
+              <label className="block font-serif text-xl font-bold text-stone-900 mb-2">
                 Tell us your vibe
               </label>
-              <p className="text-sm text-zinc-500 mb-4">
+              <p className="text-sm text-stone-500 mb-4 font-light">
                 The more descriptive you are, the better our engine can match you. Try a mood, memory, place, or feeling.
               </p>
               <textarea
@@ -353,20 +461,20 @@ export function RecommendClient() {
                 onChange={(e) => setAiPrompt(e.target.value)}
                 rows={5}
                 placeholder="e.g. I want something that smells like a cozy autumn evening in a Parisian cafe — warm, woody, with a hint of coffee and vanilla..."
-                className="w-full rounded-xl bg-zinc-800/60 border border-zinc-700 text-zinc-100 placeholder-zinc-600 px-4 py-3 text-sm leading-relaxed focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 resize-none transition-colors"
+                className="w-full rounded-xl bg-stone-50 border border-stone-300 text-stone-900 placeholder-stone-400 px-4 py-3 text-sm leading-relaxed focus:outline-none focus:border-[#C59B4B] focus:ring-1 focus:ring-[#C59B4B]/40 resize-none transition-colors shadow-inner"
               />
               <div className="mt-2 flex justify-between items-center">
-                <span className="text-xs text-zinc-600">{aiPrompt.length} / 500 characters</span>
+                <span className="text-xs text-stone-400 font-mono">{aiPrompt.length} / 500 characters</span>
                 <button
                   onClick={() => setAiPrompt('')}
-                  className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                  className="text-xs text-stone-500 hover:text-[#9A7025] transition-colors"
                 >
                   Clear
                 </button>
               </div>
 
               {aiError && (
-                <div className="mt-4 rounded-xl border border-rose-500/40 bg-rose-500/10 p-3.5 text-xs text-rose-300">
+                <div className="mt-4 rounded-xl border border-rose-400/40 bg-rose-50 p-3.5 text-xs text-rose-700">
                   {aiError}
                 </div>
               )}
@@ -376,7 +484,7 @@ export function RecommendClient() {
           {/* Example Prompt Chips */}
           <FadeIn direction="up" delay={200}>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-600 mb-3">
+              <p className="text-xs font-semibold uppercase tracking-widest text-stone-500 mb-3">
                 ✦ Quick Vibe Starters
               </p>
               <div className="flex flex-wrap gap-2">
@@ -384,7 +492,7 @@ export function RecommendClient() {
                   <button
                     key={i}
                     onClick={() => handleExamplePrompt(prompt)}
-                    className="rounded-full border border-zinc-800 bg-zinc-900/70 px-4 py-2 text-xs text-zinc-400 transition-all hover:border-amber-500/40 hover:bg-zinc-800/80 hover:text-amber-300"
+                    className="rounded-full border border-stone-200 bg-white px-4 py-2 text-xs text-stone-700 transition-all hover:border-[#C59B4B]/60 hover:bg-[#C59B4B]/10 hover:text-[#704C16] shadow-sm hover:scale-105"
                   >
                     {prompt}
                   </button>
@@ -398,16 +506,25 @@ export function RecommendClient() {
             <button
               onClick={handleAiSubmit}
               disabled={aiPrompt.trim().length < 10 || isPending}
-              className="group w-full flex h-14 items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 font-semibold text-zinc-950 shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] hover:shadow-amber-500/30 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
+              className="group w-full flex h-14 items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B] font-semibold text-white shadow-xl shadow-[#C59B4B]/30 transition-all hover:scale-[1.02] hover:shadow-2xl disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
             >
               {isPending ? (
-                <><Loader2 className="h-5 w-5 animate-spin" /> Finding your matches...</>
+                <><Loader2 className="h-5 w-5 animate-spin" /> Preparing Secure Checkout...</>
               ) : (
-                <><Sparkles className="h-5 w-5" /> Analyse & Find My Scent Matches <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></>
+                <>
+                  <Lock className="h-4 w-4 text-white" />
+                  <span>Unlock AI Scent Sommelier</span>
+                  <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold">$1.99</span>
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </>
               )}
             </button>
+            <div className="flex items-center justify-center gap-2 mt-3 text-xs text-stone-500">
+              <CreditCard className="h-3.5 w-3.5 text-[#C59B4B]" />
+              <span>1-Time Scent Pass &bull; Instant Gemini AI Curation &bull; Powered by Stripe</span>
+            </div>
             {aiPrompt.trim().length < 10 && aiPrompt.length > 0 && (
-              <p className="text-center text-xs text-amber-600 mt-2">Please write at least 10 characters for a good match.</p>
+              <p className="text-center text-xs text-amber-700 mt-2 font-medium">Please write at least 10 characters for a good match.</p>
             )}
           </FadeIn>
         </div>
@@ -423,10 +540,10 @@ export function RecommendClient() {
           {/* Step 1 - Gender */}
           {step === 1 && (
             <FadeIn direction="right" delay={100}>
-              <div className="glass-card rounded-2xl p-6 md:p-8">
-                <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">Step 1 of 4</span>
-                <h2 className="font-serif text-2xl font-bold text-white mt-2 mb-1">Who are you shopping for?</h2>
-                <p className="text-sm text-zinc-500 mb-6">This helps us narrow down fragrance profiles and intensity.</p>
+              <div className="glass-card rounded-2xl p-6 md:p-8 bg-white/95 border border-[#C59B4B]/25 shadow-md">
+                <span className="text-xs font-mono text-[#9A7025] uppercase tracking-widest font-bold">Step 1 of 4</span>
+                <h2 className="font-serif text-2xl font-bold text-stone-900 mt-2 mb-1">Who are you shopping for?</h2>
+                <p className="text-sm text-stone-500 mb-6 font-light">This helps us narrow down fragrance profiles and intensity.</p>
                 <div className="grid gap-3 sm:grid-cols-3">
                   <SelectCard icon={User} label="For Him" sublabel="Typically bold, woody, spicy" selected={form.gender === 'MALE'} onClick={() => setForm({ ...form, gender: 'MALE' })} />
                   <SelectCard icon={UserRound} label="For Her" sublabel="Floral, fruity, powdery" selected={form.gender === 'FEMALE'} onClick={() => setForm({ ...form, gender: 'FEMALE' })} />
@@ -439,10 +556,10 @@ export function RecommendClient() {
           {/* Step 2 - Season */}
           {step === 2 && (
             <FadeIn direction="right" delay={100}>
-              <div className="glass-card rounded-2xl p-6 md:p-8">
-                <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">Step 2 of 4</span>
-                <h2 className="font-serif text-2xl font-bold text-white mt-2 mb-1">What season will you wear it most?</h2>
-                <p className="text-sm text-zinc-500 mb-6">Fragrances are formulated to perform differently in heat vs cold air.</p>
+              <div className="glass-card rounded-2xl p-6 md:p-8 bg-white/95 border border-[#C59B4B]/25 shadow-md">
+                <span className="text-xs font-mono text-[#9A7025] uppercase tracking-widest font-bold">Step 2 of 4</span>
+                <h2 className="font-serif text-2xl font-bold text-stone-900 mt-2 mb-1">What season will you wear it most?</h2>
+                <p className="text-sm text-stone-500 mb-6 font-light">Fragrances are formulated to perform differently in heat vs cold air.</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <SelectCard icon={Sun} label="Summer" sublabel="Fresh, aquatic, citrus-led" selected={form.season === 'Summer'} onClick={() => setForm({ ...form, season: 'Summer' })} />
                   <SelectCard icon={Snowflake} label="Winter" sublabel="Warm, vanilla, amber, oud" selected={form.season === 'Winter'} onClick={() => setForm({ ...form, season: 'Winter' })} />
@@ -456,10 +573,10 @@ export function RecommendClient() {
           {/* Step 3 - Occasion */}
           {step === 3 && (
             <FadeIn direction="right" delay={100}>
-              <div className="glass-card rounded-2xl p-6 md:p-8">
-                <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">Step 3 of 4</span>
-                <h2 className="font-serif text-2xl font-bold text-white mt-2 mb-1">What occasion is it for?</h2>
-                <p className="text-sm text-zinc-500 mb-6">Projection and sillage requirements change based on setting and social distance.</p>
+              <div className="glass-card rounded-2xl p-6 md:p-8 bg-white/95 border border-[#C59B4B]/25 shadow-md">
+                <span className="text-xs font-mono text-[#9A7025] uppercase tracking-widest font-bold">Step 3 of 4</span>
+                <h2 className="font-serif text-2xl font-bold text-stone-900 mt-2 mb-1">What occasion is it for?</h2>
+                <p className="text-sm text-stone-500 mb-6 font-light">Projection and sillage requirements change based on setting and social distance.</p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <SelectCard icon={Briefcase} label="Office / Work" sublabel="Subtle, clean, professional" selected={form.occasion === 'Office'} onClick={() => setForm({ ...form, occasion: 'Office' })} />
                   <SelectCard icon={Heart} label="Date Night" sublabel="Intimate, sensual, magnetic" selected={form.occasion === 'DateNight'} onClick={() => setForm({ ...form, occasion: 'DateNight' })} />
@@ -473,37 +590,71 @@ export function RecommendClient() {
           {/* Step 4 - Budget + Intensity */}
           {step === 4 && (
             <FadeIn direction="right" delay={100}>
-              <div className="glass-card rounded-2xl p-6 md:p-8 space-y-8">
+              <div className="glass-card rounded-2xl p-6 md:p-8 space-y-8 bg-white/95 border border-[#C59B4B]/25 shadow-md">
                 <div>
-                  <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">Step 4 of 4</span>
-                  <h2 className="font-serif text-2xl font-bold text-white mt-2 mb-1">Budget & Intensity preference</h2>
-                  <p className="text-sm text-zinc-500 mb-6">Last step! Set your spend range and how bold you want the scent projection to be.</p>
+                  <span className="text-xs font-mono text-[#9A7025] uppercase tracking-widest font-bold">Step 4 of 4</span>
+                  <h2 className="font-serif text-2xl font-bold text-stone-900 mt-2 mb-1">Budget & Scent Projection</h2>
+                  <p className="text-sm text-stone-500 mb-6 font-light">Select your target price bracket and the projection sillage you desire.</p>
 
                   {/* Budget Grid */}
-                  <p className="text-sm font-semibold text-zinc-300 mb-3">Budget Range</p>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {(['$', '$$', '$$$', '$$$$'] as const).map((b) => (
-                      <button
-                        key={b}
-                        onClick={() => setForm({ ...form, budget: b })}
-                        className={`rounded-xl border py-3.5 text-center font-mono font-bold text-sm transition-all hover:-translate-y-0.5 ${
-                          form.budget === b
-                            ? 'border-amber-400/60 bg-amber-500/15 text-amber-300 shadow-lg shadow-amber-500/10'
-                            : 'border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-amber-500/30'
-                        }`}
-                      >
-                        {b}
-                        <span className="block text-[10px] font-normal mt-1 text-zinc-600">
-                          {b === '$' ? 'Under ₹3K' : b === '$$' ? '₹3K–₹7K' : b === '$$$' ? '₹7K–₹15K' : 'Above ₹15K'}
-                        </span>
-                      </button>
-                    ))}
+                  <div className="mb-6">
+                    <p className="text-sm font-semibold text-stone-900 mb-3 flex items-center justify-between">
+                      <span>Maximum Bottle Budget</span>
+                      <span className="text-xs text-[#9A7025] font-mono font-bold">
+                        {form.budget ? BUDGET_TIERS.find((b) => b.key === form.budget)?.range : 'Select a range'}
+                      </span>
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                      {BUDGET_TIERS.map((b) => {
+                        const isSelected = form.budget === b.key;
+                        return (
+                          <button
+                            key={b.key}
+                            type="button"
+                            onClick={() => setForm({ ...form, budget: b.key })}
+                            className={`group relative flex flex-col justify-between rounded-2xl border p-4 text-left transition-all duration-300 hover:-translate-y-1 ${
+                              isSelected
+                                ? 'border-[#C59B4B] bg-[#C59B4B]/10 shadow-lg shadow-[#C59B4B]/15 ring-1 ring-[#C59B4B]/40'
+                                : 'border-stone-200 bg-white hover:border-[#C59B4B]/40 hover:bg-stone-50/80 shadow-sm'
+                            }`}
+                          >
+                            <div>
+                              <div className="flex items-center justify-between gap-2 mb-2">
+                                <span
+                                  className={`font-mono text-xl font-extrabold tracking-tight transition-colors ${
+                                    isSelected ? 'text-[#704C16]' : 'text-stone-900 group-hover:text-[#9A7025]'
+                                  }`}
+                                >
+                                  {b.range}
+                                </span>
+                                {isSelected ? (
+                                  <CheckCircle2 className="h-4 w-4 text-[#C59B4B] shrink-0" />
+                                ) : (
+                                  <div className="h-3.5 w-3.5 rounded-full border border-stone-300 group-hover:border-[#C59B4B]/60" />
+                                )}
+                              </div>
+                              <p
+                                className={`text-xs font-semibold uppercase tracking-wider mb-1 ${
+                                  isSelected ? 'text-[#704C16]' : 'text-stone-800'
+                                }`}
+                              >
+                                {b.title}
+                              </p>
+                              <p className="text-xs text-stone-500 leading-relaxed font-light">
+                                {b.desc}
+                              </p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
                 {/* Intensity Slider */}
-                <div>
-                  <p className="text-sm font-semibold text-zinc-300 mb-4">Scent Intensity / Projection</p>
+                <div className="pt-2 border-t border-stone-200/80">
+                  <p className="text-sm font-semibold text-stone-900 mb-4">Scent Intensity / Projection Power</p>
                   <IntensitySlider value={form.intensity} onChange={(v) => setForm({ ...form, intensity: v })} />
                 </div>
               </div>
@@ -516,7 +667,7 @@ export function RecommendClient() {
               {step > 1 && (
                 <button
                   onClick={() => setStep((s) => (s - 1) as Step)}
-                  className="flex h-12 items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 px-5 text-sm text-zinc-400 transition-all hover:border-amber-500/30 hover:text-zinc-200"
+                  className="flex h-12 items-center gap-2 rounded-xl border border-stone-300 bg-white px-5 text-sm font-semibold text-stone-700 transition-all hover:border-[#C59B4B] hover:text-[#9A7025] hover:bg-stone-50 shadow-sm"
                 >
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
@@ -526,7 +677,7 @@ export function RecommendClient() {
                 <button
                   onClick={() => setStep((s) => (s + 1) as Step)}
                   disabled={!canProceed()}
-                  className="flex flex-1 h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500/80 to-yellow-500/80 font-semibold text-zinc-950 transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
+                  className="flex flex-1 h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B] font-semibold text-white transition-all hover:scale-[1.02] shadow-md shadow-[#C59B4B]/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100"
                 >
                   Continue <ChevronRight className="h-4 w-4" />
                 </button>
@@ -534,12 +685,17 @@ export function RecommendClient() {
                 <button
                   onClick={handleGuidedSubmit}
                   disabled={!canProceed() || isPending}
-                  className="group flex flex-1 h-14 items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 font-semibold text-zinc-950 shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="group flex flex-1 h-14 items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B] font-semibold text-white shadow-xl shadow-[#C59B4B]/30 transition-all hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isPending ? (
-                    <><Loader2 className="h-5 w-5 animate-spin" /> Matching your scent...</>
+                    <><Loader2 className="h-5 w-5 animate-spin" /> Preparing Checkout...</>
                   ) : (
-                    <><Sparkles className="h-5 w-5" /> Show My Top 5 Matches <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></>
+                    <>
+                      <Lock className="h-4 w-4 text-white" />
+                      <span>Unlock Top 5 Matches</span>
+                      <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold">$1.99</span>
+                      <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </>
                   )}
                 </button>
               )}
@@ -549,12 +705,12 @@ export function RecommendClient() {
       )}
 
       {/* ─── How AI Works Info Scroll Section ─────────────────────────────── */}
-      <div className="mt-28 border-t border-zinc-900 pt-20 space-y-16">
+      <div className="mt-28 border-t border-stone-200/80 pt-20 space-y-16">
         <FadeIn direction="up">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-3">Under the hood</p>
-            <h2 className="font-serif text-3xl font-bold text-white">What happens after you submit?</h2>
-            <p className="text-zinc-500 mt-3 max-w-lg mx-auto text-sm font-light">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#9A7025] mb-3 font-mono">Under the hood</p>
+            <h2 className="font-serif text-3xl font-bold text-stone-900">What happens after you submit?</h2>
+            <p className="text-stone-600 mt-3 max-w-lg mx-auto text-sm font-light leading-relaxed">
               We don't just filter by category. Our algorithm computes a weighted match score across 6 data dimensions.
             </p>
           </div>
@@ -582,10 +738,10 @@ export function RecommendClient() {
             },
           ].map(({ step: s, title, description, delay }) => (
             <FadeIn key={s} direction="up" delay={delay}>
-              <div className="glass-card glass-card-hover rounded-2xl p-6 h-full">
+              <div className="glass-card glass-card-hover rounded-2xl p-6 h-full bg-white/95 border border-[#C59B4B]/25 shadow-sm">
                 <div className="font-mono text-3xl font-bold golden-text-gradient mb-4">{s}</div>
-                <h3 className="font-serif text-lg font-bold text-white mb-2">{title}</h3>
-                <p className="text-sm text-zinc-400 leading-relaxed">{description}</p>
+                <h3 className="font-serif text-lg font-bold text-stone-900 mb-2">{title}</h3>
+                <p className="text-sm text-stone-600 leading-relaxed font-light">{description}</p>
               </div>
             </FadeIn>
           ))}

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { User, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
 import { z } from 'zod';
 
 const registerSchema = z.object({
@@ -71,18 +71,18 @@ export function RegisterForm() {
 
   return (
     <div className="mx-auto w-full max-w-md px-4">
-      <div className="glass-card rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden">
+      <div className="glass-card rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden bg-white/95 border border-[#C59B4B]/25">
         {/* Top Glow Accent */}
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B]" />
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 border border-amber-500/30">
-            <Sparkles className="h-6 w-6 text-amber-400 animate-pulse" />
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#C59B4B]/10 border border-[#C59B4B]/30">
+            <Sparkles className="h-6 w-6 text-[#C59B4B] animate-pulse" />
           </div>
-          <h1 className="font-serif text-3xl font-extrabold text-white">Create Account</h1>
-          <p className="mt-2 text-xs text-zinc-400 font-light">
-            Get 3 free AI recommendation credits on signup
+          <h1 className="font-serif text-3xl font-extrabold text-stone-900">Create Account</h1>
+          <p className="mt-2 text-xs text-stone-500 font-light">
+            Join the Royal Scent Atelier & access personalized fragrance history
           </p>
         </div>
 
@@ -91,8 +91,8 @@ export function RegisterForm() {
           <div
             className={`mb-6 rounded-xl border p-4 text-xs font-medium ${
               serverMessage.type === 'success'
-                ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-                : 'border-rose-500/40 bg-rose-500/10 text-rose-300'
+                ? 'border-emerald-400/40 bg-emerald-50 text-emerald-700'
+                : 'border-rose-400/40 bg-rose-50 text-rose-700'
             }`}
           >
             {serverMessage.text}
@@ -103,64 +103,64 @@ export function RegisterForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Full Name */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5 font-mono">
               Full Name
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <User className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
-                className={`w-full rounded-xl bg-zinc-900/80 border ${
-                  errors.name ? 'border-rose-500' : 'border-zinc-700 focus:border-amber-500/60'
-                } pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500/30 transition-colors`}
+                className={`w-full rounded-xl bg-stone-50 border ${
+                  errors.name ? 'border-rose-500' : 'border-stone-300 focus:border-[#C59B4B]'
+                } pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C59B4B]/30 transition-colors shadow-inner`}
               />
             </div>
-            {errors.name && <p className="mt-1 text-xs text-rose-400">{errors.name}</p>}
+            {errors.name && <p className="mt-1 text-xs text-rose-500 font-medium">{errors.name}</p>}
           </div>
 
           {/* Email Address */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5 font-mono">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className={`w-full rounded-xl bg-zinc-900/80 border ${
-                  errors.email ? 'border-rose-500' : 'border-zinc-700 focus:border-amber-500/60'
-                } pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500/30 transition-colors`}
+                className={`w-full rounded-xl bg-stone-50 border ${
+                  errors.email ? 'border-rose-500' : 'border-stone-300 focus:border-[#C59B4B]'
+                } pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C59B4B]/30 transition-colors shadow-inner`}
               />
             </div>
-            {errors.email && <p className="mt-1 text-xs text-rose-400">{errors.email}</p>}
+            {errors.email && <p className="mt-1 text-xs text-rose-500 font-medium">{errors.email}</p>}
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5 font-mono">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
-                className={`w-full rounded-xl bg-zinc-900/80 border ${
-                  errors.password ? 'border-rose-500' : 'border-zinc-700 focus:border-amber-500/60'
-                } pl-10 pr-10 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500/30 transition-colors`}
+                className={`w-full rounded-xl bg-stone-50 border ${
+                  errors.password ? 'border-rose-500' : 'border-stone-300 focus:border-[#C59B4B]'
+                } pl-10 pr-10 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C59B4B]/30 transition-colors shadow-inner`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -171,54 +171,54 @@ export function RegisterForm() {
                 {[1, 2, 3, 4].map((level) => (
                   <div
                     key={level}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
+                    className={`h-1.5 flex-1 rounded-full transition-colors ${
                       level <= strength
                         ? strength <= 2
-                          ? 'bg-amber-500'
-                          : 'bg-emerald-400'
-                        : 'bg-zinc-800'
+                          ? 'bg-[#C59B4B]'
+                          : 'bg-emerald-500'
+                        : 'bg-stone-200'
                     }`}
                   />
                 ))}
-                <span className="text-[10px] text-zinc-400 ml-1">
+                <span className="text-[10px] text-stone-500 ml-1 font-mono font-medium">
                   {strength <= 1 ? 'Weak' : strength <= 3 ? 'Medium' : 'Strong'}
                 </span>
               </div>
             )}
-            {errors.password && <p className="mt-1 text-xs text-rose-400">{errors.password}</p>}
+            {errors.password && <p className="mt-1 text-xs text-rose-500 font-medium">{errors.password}</p>}
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5 font-mono">
               Confirm Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter password"
-                className={`w-full rounded-xl bg-zinc-900/80 border ${
-                  errors.confirmPassword ? 'border-rose-500' : 'border-zinc-700 focus:border-amber-500/60'
-                } pl-10 pr-4 py-2.5 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-amber-500/30 transition-colors`}
+                className={`w-full rounded-xl bg-stone-50 border ${
+                  errors.confirmPassword ? 'border-rose-500' : 'border-stone-300 focus:border-[#C59B4B]'
+                } pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C59B4B]/30 transition-colors shadow-inner`}
               />
             </div>
-            {errors.confirmPassword && <p className="mt-1 text-xs text-rose-400">{errors.confirmPassword}</p>}
+            {errors.confirmPassword && <p className="mt-1 text-xs text-rose-500 font-medium">{errors.confirmPassword}</p>}
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
             disabled={isPending}
-            className="group w-full flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 font-semibold text-zinc-950 shadow-lg shadow-amber-500/20 transition-all hover:scale-[1.02] hover:shadow-amber-500/30 disabled:opacity-50 mt-4"
+            className="group w-full flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B] font-semibold text-white shadow-lg shadow-[#C59B4B]/30 transition-all hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 mt-4"
           >
             {isPending ? (
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <>
-                <span>Create Free Account</span>
+                <span>Create Account</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </>
             )}
@@ -226,9 +226,9 @@ export function RegisterForm() {
         </form>
 
         {/* Footer link */}
-        <p className="mt-6 text-center text-xs text-zinc-400">
+        <p className="mt-6 text-center text-xs text-stone-500">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-amber-400 hover:underline">
+          <Link href="/login" className="font-semibold text-[#9A7025] hover:underline">
             Sign In Here
           </Link>
         </p>

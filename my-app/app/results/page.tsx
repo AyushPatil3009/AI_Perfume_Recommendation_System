@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function ResultsPage() {
   return (
-    <div className="relative min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="relative min-h-screen bg-[#FAF7F2] text-[#1C1610]">
       <AmbientFragranceParticles />
       <Navbar />
       <ResultsClient />

@@ -1,39 +1,177 @@
 @import "tailwindcss";
 
+@theme {
+  /* 🪄 Global Tailwind Token Bridge: Overrides hardcoded amber/yellow utilities to Royal Gold */
+  --color-amber-100: var(--brand-light);
+  --color-amber-200: var(--brand-light);
+  --color-amber-300: var(--brand-primary);
+  --color-amber-400: var(--brand-primary);
+  --color-amber-500: var(--brand-primary);
+  --color-amber-600: var(--brand-primary-hover);
+  --color-yellow-200: var(--brand-light);
+  --color-yellow-300: var(--brand-light);
+  --color-yellow-400: var(--brand-primary);
+  --color-yellow-500: var(--brand-primary);
+  --color-yellow-600: var(--brand-primary-hover);
+
+  --color-brand-bg: var(--bg-main);
+  --color-brand-surface: var(--surface-card);
+  --color-brand-surface-hover: var(--surface-card-hover);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-hover: var(--brand-primary-hover);
+  --color-brand-light: var(--brand-light);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-border: var(--brand-border);
+}
+
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   :root {
-    /* 🎨 Option A: Royal Gold & Champagne Theme (Restored) */
-    --background: #09090b; /* Deep Obsidian Black */
-    --foreground: #f4f4f5; /* Crisp White Text */
-    
-    /* Brand Accent Colors */
-    --gold-primary: #D4AF37;
-    --gold-light: #FFF5C0;
-    --gold-dark: #AA771C;
-    --brand-border: rgba(212, 175, 55, 0.2);
-    --brand-border-hover: rgba(212, 175, 55, 0.5);
-    
-    /* Card Backgrounds */
-    --glass-bg: rgba(24, 24, 27, 0.75);
-    --glass-bg-hover: rgba(39, 39, 42, 0.85);
+    /* ==========================================================================
+       👑 ROYAL WHITE OUD & 24K IMPERIAL GOLD PALETTE
+       Opulent Silk Pearl, Porcelain Glass, 24K Crown Gold & Deep Espresso Bronze
+       ========================================================================== */
+
+    /* 🌌 1. Canvas & Surfaces */
+    --bg-main: #FAF7F2;                          /* Warm Silk Alabaster Ivory */
+    --foreground: #1C1610;                       /* Deep Royal Espresso Text */
+    --surface-card: rgba(255, 255, 255, 0.92);   /* Frosted Porcelain White Glass */
+    --surface-card-hover: rgba(255, 255, 255, 0.98);/* Luminous Silk Hover */
+
+    /* 💎 2. Primary Brand Colors */
+    --brand-primary: #C59B4B;                    /* 24K Imperial Crown Gold */
+    --brand-primary-hover: #A87C30;              /* Antique Burnished Gold */
+    --brand-light: #F7E7C4;                      /* Champagne Silk Highlight */
+    --brand-dark: #704C16;                       /* Royal Bronze Lowlight */
+
+    /* ✨ 3. Borders & Glows */
+    --brand-border: rgba(197, 155, 75, 0.32);    /* Gold Leaf Border */
+    --brand-border-hover: rgba(197, 155, 75, 0.7);/* Focused 24K Gold Sheen */
+    --brand-glow: rgba(197, 155, 75, 0.12);      /* Soft Sunlit Amber Glow */
+    --brand-glow-strong: rgba(197, 155, 75, 0.28);/* Radiant 24K Gold Beam */
   }
 
   body {
-    background-color: var(--background);
+    background-color: var(--bg-main);
     color: var(--foreground);
     overflow-x: hidden;
   }
 }
 
+/* 🏆 Master Gradient Text Class */
+.golden-text-gradient,
+.brand-text-gradient {
+  background: linear-gradient(135deg, #704C16 0%, #C59B4B 40%, #A87C30 70%, #C59B4B 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldenWave 6s ease infinite;
+}
+
+/* 🪟 Centralized Glassmorphism Class (Porcelain Light Luxury) */
+.glass-card {
+  background: var(--surface-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--brand-border);
+  box-shadow: 0 10px 35px -5px rgba(160, 130, 80, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.glass-card-hover {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-hover:hover {
+  background: var(--surface-card-hover);
+  border-color: var(--brand-border-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 45px -5px rgba(197, 155, 75, 0.2), 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* 💫 Continuous Rotating Moving Square Border Beam */
+@keyframes rotateBorderBeam {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.moving-border-card {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  padding: 1.5px;
+  background: rgba(225, 215, 200, 0.6);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+
+.moving-border-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    transparent 0deg,
+    transparent 260deg,
+    var(--brand-border) 300deg,
+    var(--brand-primary) 345deg,
+    var(--brand-light) 358deg,
+    transparent 360deg
+  );
+  animation: rotateBorderBeam 6s linear infinite;
+  z-index: 0;
+  opacity: 0.85;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Card lifts up and border highlights on hover */
+.moving-border-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 40px -8px rgba(180, 140, 70, 0.22), 0 0 25px var(--brand-glow-strong);
+}
+
+.moving-border-card:hover::before {
+  opacity: 1;
+  filter: drop-shadow(0 0 6px var(--brand-primary));
+}
+
+/* 🔘 Centralized Reusable Brand Components */
+.btn-brand-primary {
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-hover) 100%);
+  color: #FFFFFF;
+  font-weight: 600;
+  box-shadow: 0 8px 24px -4px rgba(197, 155, 75, 0.4);
+  transition: all 0.3s ease;
+}
+
+.btn-brand-primary:hover {
+  transform: scale(1.02);
+  filter: brightness(1.08);
+  box-shadow: 0 12px 30px -4px rgba(197, 155, 75, 0.5);
+}
+
+.badge-brand {
+  border: 1px solid var(--brand-border);
+  background: rgba(197, 155, 75, 0.1);
+  color: var(--brand-dark);
+}
+
 /* Luxury Shimmer & Glow Animations */
 @keyframes goldGlow {
   0%, 100% {
-    opacity: 0.4;
+    opacity: 0.3;
     transform: scale(1) translateY(0);
   }
   50% {
-    opacity: 0.8;
-    transform: scale(1.1) translateY(-10px);
+    opacity: 0.6;
+    transform: scale(1.08) translateY(-10px);
   }
 }
 
@@ -67,33 +205,4 @@
 
 .mist-animation {
   animation: mistFloat 12s ease-in-out infinite;
-}
-
-/* 🏆 Master Gradient Text Class */
-.golden-text-gradient {
-  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-primary) 40%, var(--gold-dark) 75%, #F5D77F 100%);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: goldenWave 6s ease infinite;
-}
-
-/* 🪟 Centralized Glassmorphism Class */
-.glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--brand-border);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-}
-
-.glass-card-hover {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass-card-hover:hover {
-  background: var(--glass-bg-hover);
-  border-color: var(--brand-border-hover);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px 0 rgba(212, 175, 55, 0.2);
 }

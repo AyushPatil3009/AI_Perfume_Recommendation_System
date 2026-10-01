@@ -14,12 +14,13 @@ import {
   Trophy,
   Droplets,
   Wind,
-  Flame,
-  Share2,
   RefreshCcw,
+  Lock,
+  Loader2,
+  ArrowRight,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { PerfumeRecommendationResult } from '@/app/types/recommendation';
-
 
 function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
@@ -43,34 +44,34 @@ function FadeIn({ children, delay = 0, direction = 'up' }: { children: React.Rea
 }
 
 function ScoreRing({ score }: { score: number }) {
-  const color = score >= 90 ? 'text-emerald-400' : score >= 75 ? 'text-amber-400' : 'text-zinc-400';
-  const bgColor = score >= 90 ? 'bg-emerald-500/10 border-emerald-500/40' : score >= 75 ? 'bg-amber-500/10 border-amber-500/40' : 'bg-zinc-700/20 border-zinc-600/40';
+  const color = score >= 90 ? 'text-emerald-700' : score >= 75 ? 'text-[#704C16]' : 'text-stone-600';
+  const bgColor = score >= 90 ? 'bg-emerald-50 border-emerald-300' : score >= 75 ? 'bg-[#C59B4B]/15 border-[#C59B4B]/40' : 'bg-stone-100 border-stone-200';
   return (
-    <div className={`flex flex-col items-center justify-center rounded-2xl border px-4 py-3 ${bgColor}`}>
+    <div className={`flex flex-col items-center justify-center rounded-2xl border px-4 py-3 shadow-inner ${bgColor}`}>
       <span className={`font-mono text-3xl font-black ${color}`}>{score}%</span>
-      <span className="text-[10px] uppercase tracking-widest text-zinc-500 mt-0.5">Match</span>
+      <span className="text-[10px] uppercase tracking-widest text-stone-500 mt-0.5 font-bold">Match</span>
     </div>
   );
 }
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) return (
-    <div className="flex items-center gap-1.5 rounded-full bg-amber-400/15 border border-amber-400/40 px-3 py-1">
-      <Trophy className="h-3.5 w-3.5 text-amber-400" />
-      <span className="text-xs font-bold text-amber-300">Best Match</span>
+    <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#C59B4B]/20 to-[#E6C675]/30 border border-[#C59B4B]/50 px-3 py-1 shadow-sm">
+      <Trophy className="h-3.5 w-3.5 text-[#C59B4B]" />
+      <span className="text-xs font-bold text-[#704C16]">Best Match</span>
     </div>
   );
   return (
-    <div className="flex items-center gap-1 rounded-full bg-zinc-800/80 border border-zinc-700 px-3 py-1">
-      <span className="text-xs font-semibold text-zinc-400">#{rank} Match</span>
+    <div className="flex items-center gap-1 rounded-full bg-stone-100 border border-stone-200 px-3 py-1">
+      <span className="text-xs font-semibold text-stone-600">#{rank} Match</span>
     </div>
   );
 }
 
 function NoteChip({ name }: { name: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-300">
-      <Droplets className="h-2.5 w-2.5" />
+    <span className="inline-flex items-center gap-1 rounded-full border border-[#C59B4B]/30 bg-[#C59B4B]/10 px-2.5 py-0.5 text-[11px] font-medium text-[#704C16]">
+      <Droplets className="h-2.5 w-2.5 text-[#C59B4B]" />
       {name}
     </span>
   );
@@ -80,27 +81,27 @@ function PriceTierBadge({ price }: { price?: number | null }) {
   if (!price) return null;
   if (price <= 45) {
     return (
-      <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-mono text-emerald-300" title="Under ₹3,500 (Budget Friendly)">
+      <span className="rounded-full bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 text-xs font-mono text-emerald-700" title="Under ₹3,500 (Budget Friendly)">
         $ · Budget Friendly
       </span>
     );
   }
   if (price <= 95) {
     return (
-      <span className="rounded-full bg-blue-500/10 border border-blue-500/30 px-2.5 py-0.5 text-xs font-mono text-blue-300" title="₹3,500 – ₹7,500 (Designer Signature)">
+      <span className="rounded-full bg-blue-50 border border-blue-300 px-2.5 py-0.5 text-xs font-mono text-blue-700" title="₹3,500 – ₹7,500 (Designer Signature)">
         $$ · Designer
       </span>
     );
   }
   if (price <= 200) {
     return (
-      <span className="rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-xs font-mono text-amber-300" title="₹7,500 – ₹16,000 (Luxury Designer)">
+      <span className="rounded-full bg-[#C59B4B]/15 border border-[#C59B4B]/40 px-2.5 py-0.5 text-xs font-mono text-[#704C16]" title="₹7,500 – ₹16,000 (Luxury Designer)">
         $$$ · Luxury Designer
       </span>
     );
   }
   return (
-    <span className="rounded-full bg-purple-500/10 border border-purple-500/30 px-2.5 py-0.5 text-xs font-mono text-purple-300" title="Above ₹16,000 (Haute Niche Parfumerie)">
+    <span className="rounded-full bg-purple-50 border border-purple-300 px-2.5 py-0.5 text-xs font-mono text-purple-700" title="Above ₹16,000 (Haute Niche Parfumerie)">
       $$$$ · Niche Parfumerie
     </span>
   );
@@ -126,7 +127,7 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
 
   return (
     <FadeIn direction="up" delay={delay}>
-      <div className={`relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-900/60 backdrop-blur-md transition-all duration-500 hover:border-zinc-700/80 hover:shadow-2xl ${rank === 1 ? 'border-amber-500/30 shadow-lg shadow-amber-500/10' : ''}`}>
+      <div className={`relative overflow-hidden rounded-3xl border border-stone-200/90 bg-white shadow-md backdrop-blur-md transition-all duration-500 hover:border-[#C59B4B]/60 hover:shadow-2xl ${rank === 1 ? 'border-[#C59B4B]/60 shadow-lg shadow-[#C59B4B]/10 ring-1 ring-[#C59B4B]/30' : ''}`}>
         <div className="relative z-10 p-6 md:p-8">
           {/* Top Row: Info + Score */}
           <div className="flex flex-col gap-6 sm:flex-row">
@@ -134,27 +135,27 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <RankBadge rank={rank} />
-                <span className="rounded-full bg-zinc-800/80 border border-zinc-700 px-2.5 py-0.5 text-xs text-zinc-400 font-mono">
+                <span className="rounded-full bg-stone-100 border border-stone-200 px-2.5 py-0.5 text-xs text-stone-600 font-mono">
                   {perfume.gender || 'Unisex'}
                 </span>
                 <PriceTierBadge price={perfume.approx_price} />
               </div>
 
-              <h2 className="font-serif text-2xl font-bold text-white leading-tight">{perfume.perfume}</h2>
-              <p className="text-sm text-zinc-400 font-medium mt-0.5">{perfume.brand}</p>
+              <h2 className="font-serif text-2xl font-bold text-stone-900 leading-tight">{perfume.perfume}</h2>
+              <p className="text-sm text-stone-500 font-medium mt-0.5">{perfume.brand}</p>
 
               <div className="flex items-center gap-1.5 mt-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(perfume.rating_value || 4.5) ? 'fill-amber-400 text-amber-400' : 'text-zinc-700'}`} />
+                  <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(perfume.rating_value || 4.5) ? 'fill-[#C59B4B] text-[#C59B4B]' : 'text-stone-300'}`} />
                 ))}
-                <span className="text-xs text-zinc-500 ml-1">{perfume.rating_value || 4.5}</span>
+                <span className="text-xs text-stone-500 ml-1 font-semibold">{perfume.rating_value || 4.5}</span>
               </div>
 
               {/* Accords preview */}
               {perfume.mainaccords && perfume.mainaccords.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {perfume.mainaccords.map((accord, idx) => (
-                    <span key={idx} className="rounded-md bg-zinc-800/60 border border-zinc-700 px-2 py-0.5 text-[11px] text-zinc-300 font-mono">
+                    <span key={idx} className="rounded-md bg-stone-100 border border-stone-200 px-2 py-0.5 text-[11px] text-stone-700 font-mono">
                       #{accord}
                     </span>
                   ))}
@@ -167,9 +168,9 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
               <ScoreRing score={perfume.matchScore} />
               <button
                 onClick={toggleWishlist}
-                className={`flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-300 hover:scale-110 active:scale-95 ${isWishlisted ? 'border-rose-400/50 bg-rose-500/15 text-rose-400' : 'border-zinc-700 bg-zinc-800/60 text-zinc-500 hover:border-rose-400/30 hover:text-rose-400'}`}
+                className={`flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-300 hover:scale-110 active:scale-95 shadow-sm ${isWishlisted ? 'border-rose-400/50 bg-rose-50 text-rose-600' : 'border-stone-200 bg-white text-stone-400 hover:border-rose-300 hover:text-rose-600'}`}
               >
-                <Heart className={`h-5 w-5 transition-all ${isWishlisted ? 'fill-rose-400' : ''}`} />
+                <Heart className={`h-5 w-5 transition-all ${isWishlisted ? 'fill-rose-500' : ''}`} />
               </button>
             </div>
           </div>
@@ -177,10 +178,10 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
           {/* Expand Toggle */}
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="mt-6 flex w-full items-center justify-between rounded-xl border border-zinc-800/80 bg-zinc-800/40 px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:border-amber-500/20 hover:text-amber-300"
+            className="mt-6 flex w-full items-center justify-between rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700 transition-colors hover:border-[#C59B4B]/40 hover:text-[#704C16] hover:bg-white shadow-sm"
           >
             <span className="flex items-center gap-2">
-              <Wind className="h-4 w-4 text-amber-400" />
+              <Wind className="h-4 w-4 text-[#C59B4B]" />
               {expanded ? 'Hide' : 'Show'} Olfactory Notes & AI Explanation
             </span>
             {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -190,26 +191,26 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
           {expanded && (
             <div className="mt-6 space-y-6">
               {/* AI Explanation */}
-              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5">
+              <div className="rounded-2xl border border-[#C59B4B]/25 bg-[#FAF7F2] p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
-                  <span className="text-xs font-semibold uppercase tracking-widest text-amber-400">
+                  <Sparkles className="h-4 w-4 text-[#C59B4B] animate-pulse" />
+                  <span className="text-xs font-semibold uppercase tracking-widest text-[#704C16] font-mono">
                     Why we matched this for you
                   </span>
                 </div>
-                <p className="text-sm text-zinc-300 leading-relaxed">{perfume.aiExplanation}</p>
+                <p className="text-sm text-stone-700 leading-relaxed font-sans">{perfume.aiExplanation}</p>
               </div>
 
               {/* Fragrance Pyramid Notes */}
               {(topNotes.length > 0 || middleNotes.length > 0 || baseNotes.length > 0) && (
                 <div>
-                  <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-widest text-stone-500 mb-3">
                     Fragrance Note Pyramid
                   </h3>
                   <div className="space-y-3">
                     {topNotes.length > 0 && (
                       <div>
-                        <span className="text-[11px] font-semibold text-zinc-400 uppercase mr-2">Top:</span>
+                        <span className="text-[11px] font-semibold text-stone-500 uppercase mr-2">Top:</span>
                         <div className="inline-flex flex-wrap gap-1.5 mt-1">
                           {topNotes.map((n, idx) => <NoteChip key={idx} name={n} />)}
                         </div>
@@ -217,7 +218,7 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
                     )}
                     {middleNotes.length > 0 && (
                       <div>
-                        <span className="text-[11px] font-semibold text-zinc-400 uppercase mr-2">Heart:</span>
+                        <span className="text-[11px] font-semibold text-stone-500 uppercase mr-2">Heart:</span>
                         <div className="inline-flex flex-wrap gap-1.5 mt-1">
                           {middleNotes.map((n, idx) => <NoteChip key={idx} name={n} />)}
                         </div>
@@ -225,7 +226,7 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
                     )}
                     {baseNotes.length > 0 && (
                       <div>
-                        <span className="text-[11px] font-semibold text-zinc-400 uppercase mr-2">Base:</span>
+                        <span className="text-[11px] font-semibold text-stone-500 uppercase mr-2">Base:</span>
                         <div className="inline-flex flex-wrap gap-1.5 mt-1">
                           {baseNotes.map((n, idx) => <NoteChip key={idx} name={n} />)}
                         </div>
@@ -242,7 +243,7 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
                     href={perfume.buyUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-semibold text-amber-300 transition-all hover:bg-amber-500/20 hover:scale-105"
+                    className="inline-flex items-center gap-2 rounded-xl border border-[#C59B4B]/40 bg-[#C59B4B]/10 px-5 py-2.5 text-sm font-semibold text-[#704C16] transition-all hover:bg-[#C59B4B] hover:text-white hover:scale-105 shadow-sm"
                   >
                     <ShoppingCart className="h-4 w-4" />
                     <span>View Store Link</span>
@@ -261,11 +262,24 @@ function ResultCard({ perfume, rank, delay }: { perfume: PerfumeRecommendationRe
 // ─── Results Client Main Component ───────────────────────────────────────────
 
 export function ResultsClient() {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; name?: string } | null | 'loading'>('loading');
   const [results, setResults] = useState<PerfumeRecommendationResult[]>([]);
   const [promptSummary, setPromptSummary] = useState('Your Custom Fragrance Match');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      try {
+        const storedUser = localStorage.getItem('aura_user');
+        if (storedUser) {
+          setCurrentUser(JSON.parse(storedUser));
+        } else {
+          setCurrentUser(null);
+        }
+      } catch {
+        setCurrentUser(null);
+      }
+
       const storedResults = sessionStorage.getItem('aura_results');
       const storedPrompt = sessionStorage.getItem('aura_prompt');
 
@@ -274,17 +288,64 @@ export function ResultsClient() {
           const parsed = JSON.parse(storedResults);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setResults(parsed);
+          } else {
+            router.replace('/dashboard');
           }
         } catch (e) {
           console.error('Failed to parse session results', e);
+          router.replace('/dashboard');
         }
+      } else {
+        router.replace('/dashboard');
       }
 
       if (storedPrompt) {
         setPromptSummary(storedPrompt);
       }
     }
-  }, []);
+  }, [router]);
+
+  if (currentUser === 'loading') {
+    return (
+      <main className="relative z-10 mx-auto max-w-4xl px-4 py-32 text-center">
+        <div className="inline-flex items-center gap-2 text-[#704C16]">
+          <Loader2 className="h-5 w-5 animate-spin text-[#C59B4B]" />
+          <span className="text-sm font-mono">Loading curated results...</span>
+        </div>
+      </main>
+    );
+  }
+
+  if (currentUser === null) {
+    return (
+      <main className="relative z-10 mx-auto max-w-lg px-4 py-24 sm:px-6">
+        <FadeIn direction="up">
+          <div className="glass-card rounded-3xl p-8 md:p-10 text-center shadow-xl relative overflow-hidden bg-white/95">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B]" />
+            
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C59B4B]/10 border border-[#C59B4B]/30">
+              <Lock className="h-6 w-6 text-[#C59B4B]" />
+            </div>
+
+            <h1 className="font-serif text-2xl md:text-3xl font-bold text-stone-900 mb-2">
+              Sign In to View <span className="golden-text-gradient">Results</span>
+            </h1>
+            <p className="text-stone-600 text-sm font-light leading-relaxed mb-8">
+              Your personalized fragrance recommendations and sommelier analysis require an active account.
+            </p>
+
+            <button
+              onClick={() => router.push('/login?redirect=/results')}
+              className="w-full flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B] font-semibold text-white shadow-lg shadow-[#C59B4B]/30 hover:scale-[1.02] transition-all"
+            >
+              <span>Sign In to Access</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </FadeIn>
+      </main>
+    );
+  }
 
   return (
     <main className="relative z-10 mx-auto max-w-4xl px-4 py-16 sm:px-6">
@@ -293,29 +354,32 @@ export function ResultsClient() {
         <div className="mb-12">
           <Link
             href="/recommend"
-            className="mb-6 inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2 text-sm text-zinc-400 transition-all hover:border-amber-500/30 hover:text-amber-300"
+            className="mb-6 inline-flex items-center gap-2 rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-700 transition-all hover:border-[#C59B4B] hover:text-[#9A7025] hover:bg-stone-50 shadow-sm"
           >
             <ArrowLeft className="h-4 w-4" /> Refine Preferences
           </Link>
 
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-4">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 mb-3">
-                <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
-                <span className="text-xs font-semibold uppercase tracking-widest text-amber-300">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#C59B4B]/35 bg-[#C59B4B]/10 px-4 py-1.5 mb-3">
+                <Sparkles className="h-4 w-4 text-[#C59B4B] animate-pulse" />
+                <span className="text-xs font-semibold uppercase tracking-widest text-[#704C16] font-mono">
                   AI Matched — {results.length} Recommendations
                 </span>
               </div>
-              <h1 className="font-serif text-4xl font-extrabold sm:text-5xl">
+              <h1 className="font-serif text-4xl font-extrabold sm:text-5xl text-stone-900">
                 Your <span className="golden-text-gradient">Scent Profile</span>
               </h1>
-              <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-2 max-w-lg">
-                <Wind className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                <span className="text-xs text-zinc-400 italic truncate">"{promptSummary}"</span>
+              <div className="mt-3 inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2 max-w-lg shadow-inner">
+                <Wind className="h-3.5 w-3.5 text-[#C59B4B] shrink-0" />
+                <span className="text-xs text-stone-600 italic truncate">"{promptSummary}"</span>
               </div>
             </div>
             <div className="flex gap-2 shrink-0">
-              <Link href="/recommend" className="flex h-10 items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 text-sm text-zinc-400 hover:border-amber-500/30 hover:text-amber-300 transition-colors">
+              <Link href="/dashboard" className="flex h-10 items-center gap-2 rounded-xl border border-[#C59B4B]/35 bg-[#C59B4B]/10 px-4 text-sm font-semibold text-[#704C16] hover:bg-[#C59B4B]/20 transition-all shadow-sm">
+                <Sparkles className="h-4 w-4 text-[#C59B4B]" /> Scent Vault
+              </Link>
+              <Link href="/recommend" className="flex h-10 items-center gap-2 rounded-xl border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-700 hover:border-[#C59B4B] hover:text-[#9A7025] transition-colors shadow-sm">
                 <RefreshCcw className="h-4 w-4" /> New Search
               </Link>
             </div>
@@ -331,9 +395,9 @@ export function ResultsClient() {
           ))}
         </div>
       ) : (
-        <div className="glass-card rounded-2xl p-12 text-center">
-          <p className="text-zinc-400 text-sm mb-4">No results found in current session. Take the questionnaire to get your personalized recommendations.</p>
-          <Link href="/recommend" className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-2.5 text-sm font-semibold text-zinc-950">
+        <div className="glass-card rounded-2xl p-12 text-center bg-white/95 border border-stone-200 shadow-sm">
+          <p className="text-stone-600 text-sm mb-4">No results found in current session. Take the questionnaire to get your personalized recommendations.</p>
+          <Link href="/recommend" className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#C59B4B] via-[#D4AF37] to-[#B8860B] px-6 py-2.5 text-sm font-semibold text-white shadow-md">
             Take Scent Quiz
           </Link>
         </div>
