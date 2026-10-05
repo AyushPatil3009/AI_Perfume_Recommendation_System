@@ -18,7 +18,7 @@ export async function parseUserPromptWithGemini(userPrompt: string): Promise<Par
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.7-flash',
+      model: 'gemini-2.5-flash',
       contents: `You are an expert master perfumer and scent analyst. 
 Analyze the following user fragrance description/vibe and extract structured filter preferences.
 
@@ -111,7 +111,7 @@ export async function rankAndExplainWithGemini(
     console.log(`🤖 [GEMINI] Sending ${candidateSummaries.length} candidates for reranking...`);
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.7-flash',
+      model: 'gemini-2.5-flash',
       contents: `You are an elite luxury perfume sommelier.
 The user wants a perfume for this vibe/preference: "${userVibe}"
 

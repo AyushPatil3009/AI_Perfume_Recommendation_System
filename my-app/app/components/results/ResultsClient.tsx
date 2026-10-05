@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PerfumeRecommendationResult } from '@/app/types/recommendation';
+import { getRecommendationHistoryAction } from '@/app/actions/historyActions';
 
 function useInView(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null);
@@ -266,13 +267,18 @@ export function ResultsClient() {
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; name?: string } | null | 'loading'>('loading');
   const [results, setResults] = useState<PerfumeRecommendationResult[]>([]);
   const [promptSummary, setPromptSummary] = useState('Your Custom Fragrance Match');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window === 'undefined') return;
+
+    async function loadData() {
+      let activeUser: { id: string; email: string; name?: string } | null = null;
       try {
         const storedUser = localStorage.getItem('aura_user');
         if (storedUser) {
-          setCurrentUser(JSON.parse(storedUser));
+          activeUser = JSON.parse(storedUser);
+          setCurrentUser(activeUser);
         } else {
           setCurrentUser(null);
         }
@@ -280,32 +286,57 @@ export function ResultsClient() {
         setCurrentUser(null);
       }
 
-      const storedResults = sessionStorage.getItem('aura_results');
-      const storedPrompt = sessionStorage.getItem('aura_prompt');
-
-      if (storedResults) {
-        try {
+      // 1. First check sessionStorage for immediate display
+      let hasSessionData = false;
+      try {
+        const storedResults = sessionStorage.getItem('aura_results');
+        const storedPrompt = sessionStorage.getItem('aura_prompt');
+        if (storedResults) {
           const parsed = JSON.parse(storedResults);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setResults(parsed);
-          } else {
-            router.replace('/dashboard');
+            hasSessionData = true;
           }
-        } catch (e) {
-          console.error('Failed to parse session results', e);
-          router.replace('/dashboard');
         }
-      } else {
-        router.replace('/dashboard');
+        if (storedPrompt) {
+          setPromptSummary(storedPrompt);
+        }
+      } catch (e) {
+        console.error('Failed to parse session results', e);
       }
 
-      if (storedPrompt) {
-        setPromptSummary(storedPrompt);
+      // 2. If user is logged in, fetch the freshest prescription directly from PostgreSQL
+      if (activeUser?.id) {
+        try {
+          const historyRes = await getRecommendationHistoryAction(activeUser.id);
+          if (historyRes.success && historyRes.history && historyRes.history.length > 0) {
+            const latest = historyRes.history[0];
+            if (latest.results && latest.results.length > 0) {
+              setResults(latest.results);
+              setPromptSummary(latest.rawPrompt || 'Your Custom Fragrance Match');
+              sessionStorage.setItem('aura_results', JSON.stringify(latest.results));
+              sessionStorage.setItem('aura_prompt', latest.rawPrompt || 'Your Custom Fragrance Match');
+              setIsLoading(false);
+              return;
+            }
+          }
+        } catch (dbErr) {
+          console.error('Failed to sync history from DB in ResultsClient:', dbErr);
+        }
+      }
+
+      setIsLoading(false);
+
+      // If no data anywhere and not loading, redirect to dashboard if logged in or recommend
+      if (!hasSessionData && !activeUser) {
+        // Will show auth gate
       }
     }
+
+    loadData();
   }, [router]);
 
-  if (currentUser === 'loading') {
+  if (currentUser === 'loading' || isLoading) {
     return (
       <main className="relative z-10 mx-auto max-w-4xl px-4 py-32 text-center">
         <div className="inline-flex items-center gap-2 text-[#704C16]">

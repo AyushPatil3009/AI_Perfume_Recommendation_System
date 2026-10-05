@@ -5,6 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { sendPrescriptionEmail } from '@/app/lib/email';
+import { parseUserPromptWithGemini } from '@/app/services/geminiService';
 
 const connectionString = process.env.DATABASE_URL;
 const pool = new Pool({ connectionString });
@@ -32,6 +33,18 @@ export async function createCheckoutSessionAction(input: CreateCheckoutInput): P
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const preferencesJson = JSON.stringify(input.preferences || {});
+
+    // Pre-Payment Intent Guard: If AI prompt mode, validate prompt relevance first
+    const userPromptText = typeof input.preferences?.userPrompt === 'string' ? input.preferences.userPrompt.trim() : '';
+    if (userPromptText && userPromptText.length >= 5) {
+      const aiExtracted = await parseUserPromptWithGemini(userPromptText);
+      if (aiExtracted.isOffTopic) {
+        return {
+          success: false,
+          message: "Please describe a mood, season, memory, or scent preference (e.g. 'cozy rainy evening date' or 'fresh citrus office scent').",
+        };
+      }
+    }
 
     // Single Scent Recommendation Pass price = $1.99 (199 cents USD)
     const session = await stripe.checkout.sessions.create({
