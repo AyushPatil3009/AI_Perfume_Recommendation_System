@@ -90,7 +90,8 @@ export function Navbar() {
           </Link>
 
           <Link
-            href="/about"
+            href="/#about"
+            onClick={(e) => handleNavClick(e, '/#about')}
             className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-stone-700 transition-all duration-300 hover:bg-white hover:text-[#9A7025] hover:shadow-sm hover:scale-105 active:scale-95"
           >
             About

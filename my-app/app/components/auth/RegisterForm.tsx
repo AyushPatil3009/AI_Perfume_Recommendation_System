@@ -2,15 +2,20 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { User, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { registerUserAction } from '@/app/actions/authActions';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  email: z.string().email('Please enter a valid email address (e.g. name@domain.com)'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[a-zA-Z]/, 'Password must include at least one letter (A-Z or a-z)')
+    .regex(/[0-9]/, 'Password must include at least one number (0-9)')
+    .regex(/[^A-Za-z0-9]/, 'Password must include at least one special character (!@#$%^&*)'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -58,10 +63,19 @@ export function RegisterForm() {
     window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirectTo)}`;
   }
 
+  const [emailTouched, setEmailTouched] = useState(false);
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+
+  // Password Requirements Check
+  const hasMinLength = password.length >= 8;
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
   function getPasswordStrength(pass: string) {
     let score = 0;
     if (pass.length >= 8) score++;
-    if (/[A-Z]/.test(pass)) score++;
+    if (/[a-zA-Z]/.test(pass)) score++;
     if (/[0-9]/.test(pass)) score++;
     if (/[^A-Za-z0-9]/.test(pass)) score++;
     return score;
@@ -73,6 +87,7 @@ export function RegisterForm() {
     e.preventDefault();
     setErrors({});
     setServerMessage(null);
+    setEmailTouched(true);
 
     const result = registerSchema.safeParse({ name, email, password, confirmPassword });
     if (!result.success) {
@@ -171,18 +186,29 @@ export function RegisterForm() {
 
           {/* Email Address */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5 font-mono">
-              Email Address
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 font-mono">
+                Email Address
+              </label>
+              {emailTouched && (
+                <span className={`text-[11px] font-mono ${isEmailValid ? 'text-emerald-600 font-semibold' : 'text-rose-600 font-semibold'}`}>
+                  {isEmailValid ? '✓ Valid format' : '✗ Enter valid email (e.g. name@domain.com)'}
+                </span>
+              )}
+            </div>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (!emailTouched) setEmailTouched(true);
+                }}
+                onBlur={() => setEmailTouched(true)}
                 placeholder="name@example.com"
                 className={`w-full rounded-xl bg-stone-50 border ${
-                  errors.email ? 'border-rose-500' : 'border-stone-300 focus:border-[#C59B4B]'
+                  errors.email || (emailTouched && !isEmailValid) ? 'border-rose-500' : 'border-stone-300 focus:border-[#C59B4B]'
                 } pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C59B4B]/30 transition-colors shadow-inner`}
               />
             </div>
@@ -213,34 +239,57 @@ export function RegisterForm() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {/* Password Strength Indicator */}
-            {password.length > 0 && (
-              <div className="mt-2 flex items-center gap-1.5">
-                {[1, 2, 3, 4].map((level) => (
-                  <div
-                    key={level}
-                    className={`h-1.5 flex-1 rounded-full transition-colors ${
-                      level <= strength
-                        ? strength <= 2
-                          ? 'bg-[#C59B4B]'
-                          : 'bg-emerald-500'
-                        : 'bg-stone-200'
-                    }`}
-                  />
-                ))}
-                <span className="text-[10px] text-stone-500 ml-1 font-mono font-medium">
-                  {strength <= 1 ? 'Weak' : strength <= 3 ? 'Medium' : 'Strong'}
+
+            {/* Password Complexity Checklist */}
+            <div className="mt-2.5 rounded-xl border border-stone-200/90 bg-stone-50/90 p-3 space-y-1.5">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-bold text-stone-600 uppercase tracking-wider font-mono">
+                  Password Strength:
+                </span>
+                <span className="text-[10px] font-mono font-bold text-[#9A7025]">
+                  {strength <= 1 ? 'Weak' : strength <= 3 ? 'Medium' : 'Strong & Secure'}
                 </span>
               </div>
-            )}
+
+              <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+                <div className={`flex items-center gap-1.5 transition-colors ${hasMinLength ? 'text-emerald-700 font-semibold' : 'text-stone-500'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${hasMinLength ? 'bg-emerald-500' : 'bg-stone-300'}`} />
+                  <span>8+ Characters</span>
+                </div>
+                <div className={`flex items-center gap-1.5 transition-colors ${hasLetter ? 'text-emerald-700 font-semibold' : 'text-stone-500'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${hasLetter ? 'bg-emerald-500' : 'bg-stone-300'}`} />
+                  <span>1+ Letter (A-Z)</span>
+                </div>
+                <div className={`flex items-center gap-1.5 transition-colors ${hasNumber ? 'text-emerald-700 font-semibold' : 'text-stone-500'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${hasNumber ? 'bg-emerald-500' : 'bg-stone-300'}`} />
+                  <span>1+ Number (0-9)</span>
+                </div>
+                <div className={`flex items-center gap-1.5 transition-colors ${hasSpecial ? 'text-emerald-700 font-semibold' : 'text-stone-500'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${hasSpecial ? 'bg-emerald-500' : 'bg-stone-300'}`} />
+                  <span>1+ Special (!@#$)</span>
+                </div>
+              </div>
+            </div>
+
             {errors.password && <p className="mt-1 text-xs text-rose-500 font-medium">{errors.password}</p>}
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 mb-1.5 font-mono">
-              Confirm Password
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-stone-700 font-mono">
+                Confirm Password
+              </label>
+              {confirmPassword.length > 0 && (
+                <span
+                  className={`text-[11px] font-mono font-semibold ${
+                    password === confirmPassword ? 'text-emerald-600' : 'text-rose-600'
+                  }`}
+                >
+                  {password === confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
+                </span>
+              )}
+            </div>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
@@ -249,8 +298,12 @@ export function RegisterForm() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter password"
                 className={`w-full rounded-xl bg-stone-50 border ${
-                  errors.confirmPassword ? 'border-rose-500' : 'border-stone-300 focus:border-[#C59B4B]'
-                } pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C59B4B]/30 transition-colors shadow-inner`}
+                  errors.confirmPassword || (confirmPassword.length > 0 && password !== confirmPassword)
+                    ? 'border-rose-500 focus:border-rose-500 focus:ring-1 focus:ring-rose-200'
+                    : confirmPassword.length > 0 && password === confirmPassword
+                    ? 'border-emerald-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200'
+                    : 'border-stone-300 focus:border-[#C59B4B] focus:ring-1 focus:ring-[#C59B4B]/30'
+                } pl-10 pr-4 py-2.5 text-sm text-stone-900 placeholder-stone-400 focus:outline-none transition-colors shadow-inner`}
               />
             </div>
             {errors.confirmPassword && <p className="mt-1 text-xs text-rose-500 font-medium">{errors.confirmPassword}</p>}

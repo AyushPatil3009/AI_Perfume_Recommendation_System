@@ -15,12 +15,17 @@ const prisma = new PrismaClient({ adapter });
 
 const registerServerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  email: z.string().email('Please enter a valid email address (e.g. name@domain.com)'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[a-zA-Z]/, 'Password must include at least one letter (A-Z or a-z)')
+    .regex(/[0-9]/, 'Password must include at least one number (0-9)')
+    .regex(/[^A-Za-z0-9]/, 'Password must include at least one special character (!@#$%^&*)'),
 });
 
 const loginServerSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 

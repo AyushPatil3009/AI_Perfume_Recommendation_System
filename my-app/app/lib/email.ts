@@ -339,3 +339,93 @@ export async function sendPrescriptionEmail({
     return { success: false, message: err?.message };
   }
 }
+
+// ─── 3. Contact Us / Concierge Inquiry Email ─────────────────────────────────
+
+export async function sendContactEmail({
+  name,
+  email,
+  message,
+}: {
+  name: string;
+  email: string;
+  message: string;
+}) {
+  const resend = getResendClient();
+  if (!resend) {
+    console.warn('⚠️ [Resend] Skipped contact email: RESEND_API_KEY is not set in .env');
+    return { success: false, message: 'Resend API key missing' };
+  }
+
+  const toEmail = process.env.ADMIN_EMAIL || process.env.RESEND_TO_EMAIL || 'ayushpatil30905@gmail.com';
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>New Atelier Inquiry</title>
+</head>
+<body style="margin:0; padding:0; background-color:#FAF7F2; font-family:'Georgia', serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color:#1C1610;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#FAF7F2; padding:30px 10px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:600px; background-color:#FFFFFF; border-radius:20px; border:1px solid rgba(197, 155, 75, 0.35); box-shadow:0 10px 30px rgba(197, 155, 75, 0.08); overflow:hidden;">
+          <tr>
+            <td height="6" style="background:linear-gradient(90deg, #704C16 0%, #C59B4B 50%, #B8860B 100%);"></td>
+          </tr>
+          <tr>
+            <td style="padding:32px 30px;">
+              <h2 style="margin:0 0 4px 0; font-family:'Georgia', serif; font-size:22px; color:#1C1610;">
+                ✉️ New Concierge Inquiry
+              </h2>
+              <p style="margin:0 0 20px 0; font-family:-apple-system, sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:1.5px; color:#9A7025; font-weight:600;">
+                Aura Scent Atelier Contact Form
+              </p>
+
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#FAF7F2; border-radius:12px; border:1px solid rgba(197, 155, 75, 0.25); padding:16px 20px; font-family:-apple-system, sans-serif; font-size:13px; line-height:1.6; margin-bottom:20px;">
+                <tr>
+                  <td style="padding:4px 0; font-weight:bold; color:#704C16; width:80px;">From:</td>
+                  <td style="padding:4px 0; color:#1C1610;">${name}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0; font-weight:bold; color:#704C16;">Email:</td>
+                  <td style="padding:4px 0; color:#1C1610;"><a href="mailto:${email}" style="color:#9A7025; font-weight:600;">${email}</a></td>
+                </tr>
+              </table>
+
+              <div style="background-color:#FFFFFF; border-left:3px solid #C59B4B; padding:16px; border:1px solid #EAE2D8; border-left:3px solid #C59B4B; border-radius:8px; font-family:-apple-system, sans-serif; font-size:14px; line-height:1.6; color:#3A332C;">
+                <p style="margin:0 0 8px 0; font-weight:bold; color:#704C16; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Message:</p>
+                <p style="margin:0; white-space:pre-wrap;">${message}</p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 30px; background-color:#FAF7F2; border-top:1px solid rgba(197, 155, 75, 0.2); font-family:-apple-system, sans-serif; font-size:11px; color:#8C8074; text-align:center;">
+              Aura Scent AI Concierge System &bull; Received ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  try {
+    const data = await resend.emails.send({
+      from: defaultFrom,
+      to: toEmail,
+      subject: `✉️ New Atelier Inquiry from ${name} (${email})`,
+      html: htmlContent,
+      replyTo: email,
+    });
+    console.log(`✉️ [Resend] Contact inquiry forwarded to admin (${toEmail}):`, data);
+    return { success: true, data };
+  } catch (err: any) {
+    console.error(`❌ [Resend] Failed to forward contact inquiry:`, err);
+    return { success: false, message: err?.message };
+  }
+}
+

@@ -25,9 +25,13 @@ export async function createCheckoutSessionAction(input: CreateCheckoutInput): P
 }> {
   try {
     if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('❌ [CONFIG ERROR] STRIPE_SECRET_KEY is not set in your .env file.');
       return {
         success: false,
-        message: 'Stripe is not configured. Please set STRIPE_SECRET_KEY in your .env file.',
+        message:
+          process.env.NODE_ENV === 'production'
+            ? 'The payment concierge service is momentarily undergoing maintenance. Please try again shortly or contact concierge.'
+            : 'Payment gateway is not configured. Please set STRIPE_SECRET_KEY in your .env file.',
       };
     }
 
@@ -101,7 +105,10 @@ export async function createCheckoutSessionAction(input: CreateCheckoutInput): P
     console.error('❌ Error creating Stripe Checkout Session:', error);
     return {
       success: false,
-      message: error?.message || 'Failed to initiate Stripe checkout.',
+      message:
+        process.env.NODE_ENV === 'production'
+          ? 'Unable to initialize secure checkout at this moment. Please try again shortly.'
+          : error?.message || 'Failed to initiate Stripe checkout.',
     };
   }
 }

@@ -167,17 +167,18 @@ export default function Home() {
             {fragranceFamilies.map((family, idx) => (
               <div
                 key={idx}
-                className="group relative overflow-hidden rounded-2xl border border-[#C59B4B]/25 bg-white p-6 shadow-sm transition-all hover:border-[#C59B4B]/60 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#C59B4B]/10"
+                className="glass-card glass-card-hover relative overflow-hidden rounded-2xl p-6 bg-white flex flex-col justify-between"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${family.color} opacity-30 group-hover:opacity-60 transition-opacity`} />
-                <div className="relative z-10">
-                  <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#9A7025]">
-                    {family.vibe}
-                  </span>
-                  <h3 className="mt-3 font-serif text-xl font-bold text-stone-900">{family.name}</h3>
-                  <p className="mt-2 text-xs text-stone-600 leading-relaxed font-sans">
-                    <span className="text-[#9A7025] font-semibold">Notes:</span> {family.notes}
-                  </p>
+                <div className="relative z-10 flex flex-col h-full justify-between">
+                  <div>
+                    <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#9A7025]">
+                      {family.vibe}
+                    </span>
+                    <h3 className="mt-3 font-serif text-xl font-bold text-stone-900">{family.name}</h3>
+                    <p className="mt-2 text-xs text-stone-600 leading-relaxed font-sans">
+                      <span className="text-[#9A7025] font-semibold">Notes:</span> {family.notes}
+                    </p>
+                  </div>
                   <Link
                     href="/recommend"
                     className="mt-6 inline-flex items-center gap-2 text-xs font-semibold text-[#9A7025] hover:text-[#704C16] transition-colors"
@@ -230,6 +231,61 @@ export default function Home() {
               <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">Top 5 + External Buy Links</h3>
               <p className="text-sm text-stone-600 leading-relaxed">
                 Get ranked matches with personalized AI explanations and direct links to Amazon, Flipkart, or Brand official stores.
+              </p>
+            </div>
+          </div>
+        </section>
+
+
+        {/* ─── ABOUT US / PHILOSOPHY SECTION ───────────────────────────────── */}
+        <section id="about" className="mx-auto max-w-7xl px-6 py-24 border-t border-stone-200/80">
+          <div className="mb-16 text-center space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#C59B4B]/35 bg-[#C59B4B]/10 px-4 py-1.5 backdrop-blur-md">
+              <Crown className="h-4 w-4 text-[#A87C30] animate-pulse" />
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#704C16] font-mono">
+                The Haute Parfumerie Philosophy
+              </span>
+            </div>
+
+            <h2 className="font-serif text-3xl font-bold sm:text-5xl text-[#1C1610] tracking-tight">
+              Where Mathematics Meets <br />
+              <span className="golden-text-gradient">Royal Olfactory Artistry</span>
+            </h2>
+
+            <p className="max-w-2xl mx-auto text-stone-600 text-base sm:text-lg font-light leading-relaxed">
+              Aura Scent was founded on a singular conviction: finding your signature scent shouldn’t be guesswork or marketing deception. It should be a masterwork of algorithmic precision.
+            </p>
+          </div>
+
+          {/* Pillars Grid */}
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="glass-card glass-card-hover rounded-2xl p-8 bg-white text-left">
+              <div className="h-12 w-12 rounded-2xl bg-[#C59B4B]/15 border border-[#C59B4B]/35 flex items-center justify-center text-[#9A7025] mb-6 shadow-sm">
+                <Compass className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">Deterministic Science</h3>
+              <p className="text-stone-600 text-sm leading-relaxed font-light">
+                We decompose hundreds of luxury flacons into 3-tier olfactory pyramids (top, heart, base accords) and match them via weighted dimensional scoring.
+              </p>
+            </div>
+
+            <div className="glass-card glass-card-hover rounded-2xl p-8 bg-white text-left">
+              <div className="h-12 w-12 rounded-2xl bg-[#C59B4B]/15 border border-[#C59B4B]/35 flex items-center justify-center text-[#9A7025] mb-6 shadow-sm">
+                <Sparkles className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">Gemini AI Sommelier</h3>
+              <p className="text-stone-600 text-sm leading-relaxed font-light">
+                Whether you crave "a rainy autumn walk in Kyoto" or "imperial 24K amber warmth", our AI decodes abstract human emotion into rigorous note profiles.
+              </p>
+            </div>
+
+            <div className="glass-card glass-card-hover rounded-2xl p-8 bg-white text-left">
+              <div className="h-12 w-12 rounded-2xl bg-[#C59B4B]/15 border border-[#C59B4B]/35 flex items-center justify-center text-[#9A7025] mb-6 shadow-sm">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif text-xl font-bold text-stone-900 mb-2">100% Unbiased</h3>
+              <p className="text-stone-600 text-sm leading-relaxed font-light">
+                We accept zero sponsored placements from perfume brands. Every recommendation is purely ranked on harmonic resonance with your desires.
               </p>
             </div>
           </div>
