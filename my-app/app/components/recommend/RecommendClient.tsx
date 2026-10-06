@@ -38,31 +38,31 @@ interface GuidedForm {
   gender: 'MALE' | 'FEMALE' | 'UNISEX' | '';
   season: 'Summer' | 'Winter' | 'Spring' | 'Autumn' | '';
   occasion: 'Office' | 'DateNight' | 'Casual' | 'Party' | '';
-  budget: '$' | '$$' | '$$$' | '$$$$' | '';
+  budget: Number | null;
   intensity: number; // 1 to 5
 }
 
 const BUDGET_TIERS = [
   {
-    key: '$',
+    key: 45,
     range: 'Under $45',
     title: 'Value & Daily',
     desc: 'Great everyday budget staples & fresh mass-pleasers',
   },
   {
-    key: '$$',
+    key: 95,
     range: 'Up to $95',
     title: 'Designer Signature',
     desc: 'Versatile classics from top fragrance houses',
   },
   {
-    key: '$$$',
+    key: 200,
     range: 'Up to $200',
     title: 'Premium Luxury',
     desc: 'High longevity, complex notes & fine sillage',
   },
   {
-    key: '$$$$',
+    key: 9999,
     range: 'Any / $200+',
     title: 'No Price Limit',
     desc: 'All luxury, niche & master perfumery collections',
@@ -265,7 +265,7 @@ export function RecommendClient() {
     gender: '',
     season: '',
     occasion: '',
-    budget: '',
+    budget: null,
     intensity: 3,
   });
 
@@ -299,7 +299,7 @@ export function RecommendClient() {
         gender: form.gender || 'UNISEX',
         season: form.season || undefined,
         occasion: form.occasion || undefined,
-        budget: form.budget || undefined,
+        budget: form.budget ? Number(form.budget) : undefined,
         intensity: form.intensity,
       };
 
@@ -340,7 +340,7 @@ export function RecommendClient() {
     if (step === 1) return form.gender !== '';
     if (step === 2) return form.season !== '';
     if (step === 3) return form.occasion !== '';
-    if (step === 4) return form.budget !== '';
+    if (step === 4) return form.budget !== null && form.budget !== undefined;
     return true;
   }
 
@@ -700,6 +700,12 @@ export function RecommendClient() {
                 </button>
               )}
             </div>
+
+            {step === 4 && aiError && (
+              <div className="mt-4 rounded-xl border border-rose-400/40 bg-rose-50 p-4 text-xs font-medium text-rose-700 shadow-sm">
+                ⚠️ {aiError}
+              </div>
+            )}
           </FadeIn>
         </div>
       )}
